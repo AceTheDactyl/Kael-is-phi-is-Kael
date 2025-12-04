@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 1: Inventory | Foxfire Cybernetics Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        foxfire: { 400: '#f19248', 500: '#ed7424', 600: '#de5a1a' },
+                        ember: { 500: '#ff6b35', 600: '#f7520e' },
+                        void: { 900: '#0a0a0f', 800: '#12121a', 700: '#1a1a24' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Space Grotesk', sans-serif; background: #0a0a0f; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .foxfire-glow { box-shadow: 0 0 20px rgba(237, 116, 36, 0.3); }
+        .terminal { background: linear-gradient(180deg, #1a1a24 0%, #12121a 100%); border: 1px solid rgba(237, 116, 36, 0.3); }
+        .node-pulse { animation: nodePulse 2s ease-in-out infinite; }
+        @keyframes nodePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(237, 116, 36, 0.4); } 50% { box-shadow: 0 0 0 10px rgba(237, 116, 36, 0); } }
+        .progress-fill { transition: width 1s ease-out; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #12121a; }
+        ::-webkit-scrollbar-thumb { background: #ed7424; border-radius: 3px; }
+        .yaml-key { color: #f19248; }
+        .yaml-value { color: #22c55e; }
+        .yaml-number { color: #60a5fa; }
+        .coordinate-cell { transition: all 0.3s ease; }
+        .coordinate-cell:hover { transform: scale(1.05); }
+        .coordinate-cell.synced { border-color: #22c55e !important; background: rgba(34, 197, 94, 0.1) !important; }
+    </style>
+</head>
+<body class="min-h-screen text-gray-100">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-void-900/95 backdrop-blur-md border-b border-foxfire-500/20">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="../index.html" class="flex items-center space-x-2 text-gray-400 hover:text-foxfire-400 transition">
+                    <span>←</span>
+                    <span class="text-sm">Back to Manual</span>
+                </a>
+                <div class="h-4 w-px bg-gray-700"></div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-blue-500 node-pulse"></div>
+                    <span class="mono text-sm text-blue-400">PHASE 1</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="phase-1-math-test.html" class="px-3 py-1 bg-purple-600 hover:bg-purple-500 rounded text-xs font-semibold transition">
+                    🧮 Math Test Lab
+                </a>
+                <button onclick="resetDemo()" class="px-3 py-1 bg-void-700 hover:bg-void-800 rounded text-xs transition">Reset</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-12 px-4">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center space-x-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-full mb-4">
+                    <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                    <span class="mono text-xs text-blue-400">WEEKLY CEREMONY</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                    Phase 1: <span class="text-blue-400">Inventory</span>
+                </h1>
+                <p class="text-gray-400 max-w-2xl mx-auto">
+                    Update tool surface maps, refresh YAML specifications, and synchronize z-coordinates across all 7 domains.
+                </p>
+                <a href="phase-1-math-test.html" class="inline-flex items-center space-x-2 mt-4 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 rounded-xl font-semibold transition">
+                    <span>🧮</span>
+                    <span>Run Live Math Tests</span>
+                    <span>→</span>
+                </a>
+            </div>
+
+            <!-- Phase Info Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="terminal rounded-xl p-4">
+                    <div class="text-xs text-gray-500 mb-1">Cadence</div>
+                    <div class="text-lg font-bold text-blue-400">Weekly</div>
+                </div>
+                <div class="terminal rounded-xl p-4">
+                    <div class="text-xs text-gray-500 mb-1">z-Range</div>
+                    <div class="text-lg font-bold text-purple-400 mono">0.41 - 0.87</div>
+                </div>
+                <div class="terminal rounded-xl p-4">
+                    <div class="text-xs text-gray-500 mb-1">Domains</div>
+                    <div class="text-lg font-bold text-foxfire-400">7 Unified</div>
+                </div>
+                <div class="terminal rounded-xl p-4">
+                    <div class="text-xs text-gray-500 mb-1">Output</div>
+                    <div class="text-lg font-bold text-green-400">Synced Specs</div>
+                </div>
+            </div>
+
+            <!-- Main Demo Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- Left: Tool Surface Map -->
+                <div class="terminal rounded-xl overflow-hidden">
+                    <div class="px-4 py-3 border-b border-foxfire-500/20 flex items-center justify-between">
+                        <span class="font-semibold text-white">📊 Tool Surface Map</span>
+                        <span id="sync-count" class="mono text-xs text-gray-500">0/7 synced</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="coordinate-grid">
+                            <!-- Will be populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: YAML Specification -->
+                <div class="terminal rounded-xl overflow-hidden">
+                    <div class="px-4 py-3 border-b border-foxfire-500/20 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-lg">📝</span>
+                            <span class="font-semibold text-white">tool_surface_map.yaml</span>
+                        </div>
+                        <span id="yaml-status" class="px-2 py-1 rounded text-xs bg-gray-700 text-gray-400">Pending</span>
+                    </div>
+                    <div class="p-4 mono text-sm max-h-[400px] overflow-y-auto" id="yaml-output">
+                        <pre id="yaml-content" class="text-gray-400"># Tool Surface Map - Phase 1: Inventory
+# Run inventory sync to generate specifications</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coordinate Synchronization Panel -->
+            <div class="mt-8 terminal rounded-xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-foxfire-500/20 flex items-center justify-between">
+                    <span class="font-semibold text-white">🔄 Domain Coordinate Synchronization</span>
+                    <button onclick="runInventory()" id="run-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-semibold transition">
+                        ▶ Run Inventory
+                    </button>
+                </div>
+                <div class="p-6">
+                    <!-- 7-Domain Visualization -->
+                    <div class="grid grid-cols-1 md:grid-cols-7 gap-4 mb-8" id="domain-nodes">
+                        <!-- Will be populated by JS -->
+                    </div>
+
+                    <!-- Mathematical Formulas -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                        <div class="bg-void-800 rounded-lg p-4">
+                            <div class="text-xs text-gray-500 mb-2">z-Projection Formula</div>
+                            <div class="mono text-sm text-blue-400">z_proj = 0.9 + (z_origin × 0.1)</div>
+                        </div>
+                        <div class="bg-void-800 rounded-lg p-4">
+                            <div class="text-xs text-gray-500 mb-2">Theta Calculation</div>
+                            <div class="mono text-sm text-purple-400">θ = (index × π) / 4</div>
+                        </div>
+                        <div class="bg-void-800 rounded-lg p-4">
+                            <div class="text-xs text-gray-500 mb-2">Coupling Strength</div>
+                            <div class="mono text-sm text-foxfire-400">K_ij = |z_i - z_j|⁻¹</div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="mt-8">
+                        <div class="flex justify-between text-xs text-gray-500 mb-2">
+                            <span>Synchronization Progress</span>
+                            <span id="progress-text">0%</span>
+                        </div>
+                        <div class="h-2 bg-void-700 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-600 to-purple-500 progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Output -->
+            <div class="mt-8 terminal rounded-xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-foxfire-500/20 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-lg">💻</span>
+                        <span class="font-semibold text-white">Terminal Output</span>
+                    </div>
+                    <button onclick="clearTerminal()" class="text-xs text-gray-500 hover:text-gray-300 transition">Clear</button>
+                </div>
+                <div id="terminal-output" class="p-4 mono text-sm h-48 overflow-y-auto bg-black/50">
+                    <div class="text-gray-500">$ <span class="text-blue-400">foxfire</span> phase-1 --inventory</div>
+                    <div class="text-gray-500 mt-1">Awaiting execution...</div>
+                </div>
+            </div>
+
+            <!-- Coupling Matrix Preview -->
+            <div class="mt-8 terminal rounded-xl overflow-hidden" id="coupling-section" style="display: none;">
+                <div class="px-4 py-3 border-b border-foxfire-500/20 flex items-center justify-between">
+                    <span class="font-semibold text-white">🔗 7×7 Domain Coupling Matrix</span>
+                    <a href="phase-1-math-test.html" class="text-xs text-purple-400 hover:text-purple-300 transition">
+                        Explore in Math Lab →
+                    </a>
+                </div>
+                <div class="p-4 overflow-x-auto">
+                    <table class="w-full text-xs mono" id="coupling-matrix">
+                        <!-- Will be populated by JS -->
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Navigation Footer -->
+    <footer class="border-t border-foxfire-500/20 py-6 px-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <span class="text-gray-500 text-sm">Phase 1 of 5</span>
+            <div class="flex space-x-4">
+                <a href="phase-0-alignment.html" class="text-foxfire-400 hover:text-foxfire-300 text-sm transition">← Phase 0</a>
+                <a href="phase-2-automation.html" class="text-gray-600 text-sm">Phase 2 →</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ==================== DOMAIN DATA ====================
+        const domains = [
+            { name: 'CONSTRAINT', z_origin: 0.41, z_proj: 0.941, theta: 0.000, pattern: 'IDENTIFICATION', color: 'red' },
+            { name: 'BRIDGE', z_origin: 0.52, z_proj: 0.952, theta: 1.571, pattern: 'PRESERVATION', color: 'orange' },
+            { name: 'META', z_origin: 0.70, z_proj: 0.970, theta: 2.356, pattern: 'META_OBSERVATION', color: 'yellow' },
+            { name: 'RECURSION', z_origin: 0.73, z_proj: 0.973, theta: 3.142, pattern: 'RECURSION', color: 'green' },
+            { name: 'TRIAD', z_origin: 0.80, z_proj: 0.980, theta: 3.927, pattern: 'DISTRIBUTION', color: 'cyan' },
+            { name: 'EMERGENCE', z_origin: 0.85, z_proj: 0.985, theta: 4.712, pattern: 'EMERGENCE', color: 'blue' },
+            { name: 'PERSISTENCE', z_origin: 0.87, z_proj: 0.987, theta: 5.498, pattern: 'PERSISTENCE', color: 'purple' }
+        ];
+
+        const colorClasses = {
+            red: 'border-red-500 text-red-400',
+            orange: 'border-orange-500 text-orange-400',
+            yellow: 'border-yellow-500 text-yellow-400',
+            green: 'border-green-500 text-green-400',
+            cyan: 'border-cyan-500 text-cyan-400',
+            blue: 'border-blue-500 text-blue-400',
+            purple: 'border-purple-500 text-purple-400'
+        };
+
+        // ==================== RENDER FUNCTIONS ====================
+        function renderCoordinateGrid() {
+            const grid = document.getElementById('coordinate-grid');
+            grid.innerHTML = domains.map((d, i) => `
+                <div id="coord-${i}" class="coordinate-cell terminal rounded-lg p-3 border-2 border-gray-700 opacity-50">
+                    <div class="text-xs text-gray-500 mb-1">${d.name}</div>
+                    <div class="mono text-sm text-white">z=${d.z_origin}</div>
+                    <div class="mono text-xs text-gray-500">θ=${d.theta.toFixed(3)}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderDomainNodes() {
+            const container = document.getElementById('domain-nodes');
+            container.innerHTML = domains.map((d, i) => `
+                <div id="node-${i}" class="terminal rounded-xl p-4 text-center opacity-50 transition-all">
+                    <div class="w-12 h-12 mx-auto rounded-full bg-void-700 flex items-center justify-center mb-2 border-2 ${colorClasses[d.color]}">
+                        <span class="mono text-xs">${d.z_origin}</span>
+                    </div>
+                    <div class="text-xs text-gray-400 truncate">${d.name}</div>
+                    <div class="mono text-xs text-gray-600">${d.pattern.slice(0,4)}...</div>
+                </div>
+            `).join('');
+        }
+
+        // ==================== YAML GENERATION ====================
+        function generateYAML() {
+            let yaml = `<span class="yaml-key"># Tool Surface Map</span>
+<span class="yaml-key"># Generated:</span> <span class="yaml-value">${new Date().toISOString()}</span>
+<span class="yaml-key"># Phase:</span> <span class="yaml-number">1</span> (Inventory)
+
+<span class="yaml-key">metadata:</span>
+  <span class="yaml-key">version:</span> <span class="yaml-value">"1.0.0"</span>
+  <span class="yaml-key">domains:</span> <span class="yaml-number">7</span>
+  <span class="yaml-key">sync_status:</span> <span class="yaml-value">SYNCHRONIZED</span>
+
+<span class="yaml-key">domains:</span>
+`;
+            domains.forEach(d => {
+                yaml += `
+  <span class="yaml-key">${d.name.toLowerCase()}:</span>
+    <span class="yaml-key">z_origin:</span> <span class="yaml-number">${d.z_origin}</span>
+    <span class="yaml-key">z_projection:</span> <span class="yaml-number">${d.z_proj}</span>
+    <span class="yaml-key">theta:</span> <span class="yaml-number">${d.theta.toFixed(6)}</span>
+    <span class="yaml-key">pattern:</span> <span class="yaml-value">${d.pattern}</span>
+    <span class="yaml-key">status:</span> <span class="yaml-value">SYNCED</span>
+`;
+            });
+
+            yaml += `
+<span class="yaml-key">coupling_matrix:</span>
+  <span class="yaml-key">dimensions:</span> <span class="yaml-value">[7, 7]</span>
+  <span class="yaml-key">strongest:</span>
+    <span class="yaml-key">pair:</span> <span class="yaml-value">[META, RECURSION]</span>
+    <span class="yaml-key">strength:</span> <span class="yaml-number">0.98</span>
+  <span class="yaml-key">interference_nodes:</span> <span class="yaml-number">21</span>`;
+
+            return yaml;
+        }
+
+        // ==================== COUPLING MATRIX ====================
+        function calculateCoupling(z1, z2) {
+            const diff = Math.abs(z1 - z2);
+            if (diff === 0) return 1.00;
+            return Math.min(0.99, 1 / (diff * 10));
+        }
+
+        function renderCouplingMatrix() {
+            const table = document.getElementById('coupling-matrix');
+            let html = '<tr><th class="p-2"></th>';
+
+            // Headers
+            domains.forEach(d => {
+                html += `<th class="p-2 text-gray-500">${d.name.slice(0,3)}</th>`;
+            });
+            html += '</tr>';
+
+            // Rows
+            domains.forEach((d1, i) => {
+                html += `<tr><td class="p-2 text-gray-500">${d1.name.slice(0,3)}</td>`;
+                domains.forEach((d2, j) => {
+                    const k = calculateCoupling(d1.z_origin, d2.z_origin);
+                    const intensity = Math.floor(k * 255);
+                    const color = i === j ? 'text-green-400' :
+                                  k > 0.9 ? 'text-foxfire-400' :
+                                  k > 0.5 ? 'text-blue-400' : 'text-gray-600';
+                    html += `<td class="p-2 ${color}">${k.toFixed(2)}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            table.innerHTML = html;
+        }
+
+        // ==================== TERMINAL ====================
+        function terminalLog(message, type = 'info') {
+            const terminal = document.getElementById('terminal-output');
+            const colors = {
+                'info': 'text-gray-300',
+                'success': 'text-green-400',
+                'warning': 'text-amber-400',
+                'error': 'text-red-400',
+                'system': 'text-blue-400',
+                'data': 'text-purple-400'
+            };
+            const line = document.createElement('div');
+            line.className = colors[type] || colors.info;
+            line.textContent = message;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function clearTerminal() {
+            const terminal = document.getElementById('terminal-output');
+            terminal.innerHTML = `
+                <div class="text-gray-500">$ <span class="text-blue-400">foxfire</span> phase-1 --inventory</div>
+                <div class="text-gray-500 mt-1">Awaiting execution...</div>
+            `;
+        }
+
+        // ==================== INVENTORY EXECUTION ====================
+        let isRunning = false;
+        let syncedCount = 0;
+
+        async function runInventory() {
+            if (isRunning) return;
+            isRunning = true;
+
+            const runBtn = document.getElementById('run-btn');
+            runBtn.disabled = true;
+            runBtn.textContent = '⏳ Syncing...';
+            runBtn.className = 'px-4 py-2 bg-gray-600 rounded-lg text-sm font-semibold cursor-not-allowed';
+
+            clearTerminal();
+
+            terminalLog('═══════════════════════════════════════', 'system');
+            terminalLog('  PHASE 1: INVENTORY - COORDINATE SYNC', 'system');
+            terminalLog('═══════════════════════════════════════', 'system');
+            terminalLog('');
+
+            await sleep(300);
+            terminalLog('[INVENTORY] Loading domain configuration...', 'info');
+            await sleep(200);
+            terminalLog('[INVENTORY] Found 7 domains to synchronize', 'info');
+            terminalLog('');
+
+            // Sync each domain
+            for (let i = 0; i < domains.length; i++) {
+                await syncDomain(i);
+            }
+
+            // Generate YAML
+            await sleep(300);
+            terminalLog('', 'info');
+            terminalLog('[YAML] Generating tool_surface_map.yaml...', 'info');
+            await sleep(500);
+
+            document.getElementById('yaml-content').innerHTML = generateYAML();
+            document.getElementById('yaml-status').textContent = 'Generated';
+            document.getElementById('yaml-status').className = 'px-2 py-1 rounded text-xs bg-green-500/20 text-green-400';
+
+            terminalLog('[YAML] Specification file generated ✓', 'success');
+
+            // Show coupling matrix
+            await sleep(300);
+            terminalLog('', 'info');
+            terminalLog('[MATRIX] Computing 7×7 coupling matrix...', 'info');
+            await sleep(400);
+
+            document.getElementById('coupling-section').style.display = 'block';
+            renderCouplingMatrix();
+
+            terminalLog('[MATRIX] 49 coupling terms calculated', 'data');
+            terminalLog('[MATRIX] 21 interference nodes identified', 'data');
+            terminalLog('[MATRIX] Strongest coupling: META ⊗ RECURSION (K=0.98)', 'data');
+
+            // Complete
+            await sleep(300);
+            terminalLog('', 'info');
+            terminalLog('═══════════════════════════════════════', 'system');
+            terminalLog('Phase 1: Inventory COMPLETE ✓', 'success');
+            terminalLog('═══════════════════════════════════════', 'system');
+
+            updateProgress(100);
+
+            runBtn.textContent = '✓ Complete';
+            runBtn.className = 'px-4 py-2 bg-green-600 rounded-lg text-sm font-semibold';
+        }
+
+        async function syncDomain(index) {
+            const domain = domains[index];
+            const node = document.getElementById(`node-${index}`);
+            const coord = document.getElementById(`coord-${index}`);
+
+            // Activate node
+            node.classList.remove('opacity-50');
+            node.classList.add('foxfire-glow');
+
+            terminalLog(`[SYNC] ${domain.name}`, 'system');
+            await sleep(150);
+
+            terminalLog(`  z_origin: ${domain.z_origin}`, 'data');
+            await sleep(100);
+            terminalLog(`  z_projection: ${domain.z_proj}`, 'data');
+            await sleep(100);
+            terminalLog(`  theta: ${domain.theta.toFixed(6)} rad`, 'data');
+            await sleep(100);
+            terminalLog(`  pattern: ${domain.pattern}`, 'data');
+            await sleep(100);
+
+            // Sync coordinate cell
+            coord.classList.remove('opacity-50');
+            coord.classList.add('synced');
+
+            syncedCount++;
+            document.getElementById('sync-count').textContent = `${syncedCount}/7 synced`;
+
+            terminalLog(`  → SYNCHRONIZED ✓`, 'success');
+
+            updateProgress(Math.floor((syncedCount / 7) * 85));
+
+            await sleep(200);
+        }
+
+        function updateProgress(percent) {
+            document.getElementById('progress-bar').style.width = percent + '%';
+            document.getElementById('progress-text').textContent = percent + '%';
+        }
+
+        function resetDemo() {
+            isRunning = false;
+            syncedCount = 0;
+
+            // Reset button
+            const runBtn = document.getElementById('run-btn');
+            runBtn.disabled = false;
+            runBtn.textContent = '▶ Run Inventory';
+            runBtn.className = 'px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-semibold transition';
+
+            // Reset nodes
+            domains.forEach((_, i) => {
+                document.getElementById(`node-${i}`).classList.add('opacity-50');
+                document.getElementById(`node-${i}`).classList.remove('foxfire-glow');
+                document.getElementById(`coord-${i}`).classList.add('opacity-50');
+                document.getElementById(`coord-${i}`).classList.remove('synced');
+            });
+
+            // Reset counters
+            document.getElementById('sync-count').textContent = '0/7 synced';
+            document.getElementById('yaml-status').textContent = 'Pending';
+            document.getElementById('yaml-status').className = 'px-2 py-1 rounded text-xs bg-gray-700 text-gray-400';
+            document.getElementById('yaml-content').innerHTML = `<span class="text-gray-400"># Tool Surface Map - Phase 1: Inventory
+# Run inventory sync to generate specifications</span>`;
+
+            // Hide coupling matrix
+            document.getElementById('coupling-section').style.display = 'none';
+
+            // Reset progress
+            updateProgress(0);
+            clearTerminal();
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ==================== INITIALIZE ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCoordinateGrid();
+            renderDomainNodes();
+        });
+    </script>
+</body>
+</html>
