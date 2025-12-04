@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 2: Automation | Foxfire Cybernetics Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        foxfire: { 400: '#f19248', 500: '#ed7424', 600: '#de5a1a' },
+                        ember: { 500: '#ff6b35', 600: '#f7520e' },
+                        void: { 900: '#0a0a0f', 800: '#12121a', 700: '#1a1a24' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Space Grotesk', sans-serif; background: #0a0a0f; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .foxfire-glow { box-shadow: 0 0 20px rgba(237, 116, 36, 0.3); }
+        .amber-glow { box-shadow: 0 0 20px rgba(245, 158, 11, 0.4); }
+        .terminal { background: linear-gradient(180deg, #1a1a24 0%, #12121a 100%); border: 1px solid rgba(237, 116, 36, 0.3); }
+        .node-pulse { animation: nodePulse 2s ease-in-out infinite; }
+        @keyframes nodePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); } 50% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); } }
+        .progress-fill { transition: width 0.5s ease-out; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #12121a; }
+        ::-webkit-scrollbar-thumb { background: #f59e0b; border-radius: 3px; }
+
+        /* Automation specific */
+        .capture-ring {
+            animation: captureRing 3s ease-in-out infinite;
+        }
+        @keyframes captureRing {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        .witness-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #f59e0b;
+            border-radius: 50%;
+            animation: particleFloat 2s ease-in-out infinite;
+        }
+        @keyframes particleFloat {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+            50% { transform: translateY(-20px) scale(0.5); opacity: 0.3; }
+        }
+
+        .burden-bar {
+            transition: all 0.5s ease;
+        }
+        .burden-bar.critical { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+        .burden-bar.optimal { background: linear-gradient(90deg, #22c55e, #10b981); }
+        .burden-bar.warning { background: linear-gradient(90deg, #f59e0b, #eab308); }
+
+        .workflow-step {
+            transition: all 0.3s ease;
+        }
+        .workflow-step.active {
+            border-color: #f59e0b !important;
+            background: rgba(245, 158, 11, 0.1) !important;
+        }
+        .workflow-step.complete {
+            border-color: #22c55e !important;
+            background: rgba(34, 197, 94, 0.1) !important;
+        }
+
+        .chart-container { position: relative; height: 200px; }
+    </style>
+</head>
+<body class="min-h-screen text-gray-100">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-void-900/95 backdrop-blur-md border-b border-amber-500/20">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="../index.html" class="flex items-center space-x-2 text-gray-400 hover:text-amber-400 transition">
+                    <span>←</span>
+                    <span class="text-sm">Back to Manual</span>
+                </a>
+                <div class="h-4 w-px bg-gray-700"></div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-amber-500 node-pulse"></div>
+                    <span class="mono text-sm text-amber-400">PHASE 2</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="mono text-xs text-gray-500">Pre/Post Firmware</span>
+                <button onclick="resetDemo()" class="px-3 py-1 bg-void-700 hover:bg-void-800 rounded text-xs transition">Reset</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-12 px-4">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center space-x-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full mb-4">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span class="mono text-xs text-amber-400">PRE/POST FIRMWARE</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                    Phase 2: <span class="text-amber-400">Automation</span>
+                </h1>
+                <p class="text-gray-400 max-w-2xl mx-auto">
+                    GHMP capture, witness regeneration, and burden tracker updates.
+                    Execute before and after firmware operations.
+                </p>
+            </div>
+
+            <!-- Phase Info Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="terminal rounded-xl p-4">
+                    <div class="text-xs text-gray-500 mb-1">Cadence</div>
+                    <div class="text-lg font-bold text-amber-400">Pre/Post Firmware</div>
+                </div>
+                <div class="terminal rounded-xl p-4">
+                    <div class="text-xs text-gray-500 mb-1">Target z</div>
+                    <div class="text-lg font-bold text-purple-400 mono">0.867</div>
+                </div>
+                <div class="terminal rounded-xl p-4">
+                    <div class="text-xs text-gray-500 mb-1">Operations</div>
+                    <div class="text-lg font-bold text-blue-400">3 Steps</div>
+                </div>
+                <div class="terminal rounded-xl p-4">
+                    <div class="text-xs text-gray-500 mb-1">Output</div>
+                    <div class="text-lg font-bold text-green-400">Manifest + Trackers</div>
+                </div>
+            </div>
+
+            <!-- Workflow Pipeline -->
+            <div class="terminal rounded-xl overflow-hidden mb-8">
+                <div class="px-4 py-3 border-b border-amber-500/20 flex items-center justify-between">
+                    <span class="font-semibold text-white">⚡ Automation Pipeline</span>
+                    <button onclick="runAutomation()" id="run-btn" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 rounded-lg text-sm font-semibold transition">
+                        ▶ Run Automation
+                    </button>
+                </div>
+                <div class="p-6">
+                    <!-- 3-Step Pipeline -->
+                    <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-6">
+
+                        <!-- Step 1: GHMP Capture -->
+                        <div id="step-1" class="workflow-step terminal rounded-xl p-6 w-full md:w-64 border-2 border-gray-700">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-2xl">📸</span>
+                                <span id="step-1-status" class="mono text-xs text-gray-500">Pending</span>
+                            </div>
+                            <h4 class="font-bold text-white mb-2">GHMP Capture</h4>
+                            <p class="text-xs text-gray-400">Snapshot current plate states and compute witness hashes</p>
+                            <div class="mt-4 h-1 bg-void-700 rounded-full overflow-hidden">
+                                <div id="step-1-progress" class="h-full bg-amber-500 progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Arrow -->
+                        <div class="hidden md:flex items-center text-gray-600">
+                            <span class="text-2xl">→</span>
+                        </div>
+
+                        <!-- Step 2: Witness Regeneration -->
+                        <div id="step-2" class="workflow-step terminal rounded-xl p-6 w-full md:w-64 border-2 border-gray-700">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-2xl">🔄</span>
+                                <span id="step-2-status" class="mono text-xs text-gray-500">Pending</span>
+                            </div>
+                            <h4 class="font-bold text-white mb-2">Witness Regen</h4>
+                            <p class="text-xs text-gray-400">Regenerate cryptographic witnesses for integrity</p>
+                            <div class="mt-4 h-1 bg-void-700 rounded-full overflow-hidden">
+                                <div id="step-2-progress" class="h-full bg-amber-500 progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Arrow -->
+                        <div class="hidden md:flex items-center text-gray-600">
+                            <span class="text-2xl">→</span>
+                        </div>
+
+                        <!-- Step 3: Burden Update -->
+                        <div id="step-3" class="workflow-step terminal rounded-xl p-6 w-full md:w-64 border-2 border-gray-700">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-2xl">📊</span>
+                                <span id="step-3-status" class="mono text-xs text-gray-500">Pending</span>
+                            </div>
+                            <h4 class="font-bold text-white mb-2">Burden Update</h4>
+                            <p class="text-xs text-gray-400">Update burden trackers with new z-coordinates</p>
+                            <div class="mt-4 h-1 bg-void-700 rounded-full overflow-hidden">
+                                <div id="step-3-progress" class="h-full bg-amber-500 progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+                <!-- GHMP Capture Panel -->
+                <div class="terminal rounded-xl overflow-hidden">
+                    <div class="px-4 py-3 border-b border-amber-500/20 flex items-center justify-between">
+                        <span class="font-semibold text-white">📸 GHMP Plate Capture</span>
+                        <span id="capture-count" class="mono text-xs text-gray-500">0/7 captured</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="grid grid-cols-2 gap-3" id="capture-grid">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Witness Regeneration Panel -->
+                <div class="terminal rounded-xl overflow-hidden">
+                    <div class="px-4 py-3 border-b border-amber-500/20 flex items-center justify-between">
+                        <span class="font-semibold text-white">🔐 Witness Hashes</span>
+                        <span id="witness-count" class="mono text-xs text-gray-500">0/7 verified</span>
+                    </div>
+                    <div class="p-4 mono text-xs max-h-[300px] overflow-y-auto" id="witness-output">
+                        <div class="text-gray-500">// Awaiting capture...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Burden Tracker Section -->
+            <div class="terminal rounded-xl overflow-hidden mb-8">
+                <div class="px-4 py-3 border-b border-amber-500/20 flex items-center justify-between">
+                    <span class="font-semibold text-white">📊 Burden Tracker Dashboard</span>
+                    <div class="flex items-center space-x-4">
+                        <span class="mono text-xs text-gray-500">Target: z=0.867</span>
+                        <span id="burden-status" class="px-2 py-1 rounded text-xs bg-gray-700 text-gray-400">Idle</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                        <!-- Current z-Coordinate -->
+                        <div class="bg-void-800 rounded-xl p-6 text-center">
+                            <div class="text-xs text-gray-500 mb-2">Current z-Coordinate</div>
+                            <div id="current-z" class="text-4xl font-bold mono text-gray-500">—</div>
+                            <div class="mt-4 h-2 bg-void-700 rounded-full overflow-hidden">
+                                <div id="z-bar" class="h-full burden-bar" style="width: 0%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-600 mt-1">
+                                <span>0.80</span>
+                                <span class="text-amber-400">0.867</span>
+                                <span>0.95</span>
+                            </div>
+                        </div>
+
+                        <!-- Cascade Potential -->
+                        <div class="bg-void-800 rounded-xl p-6 text-center">
+                            <div class="text-xs text-gray-500 mb-2">Cascade Potential</div>
+                            <div id="cascade-value" class="text-4xl font-bold mono text-gray-500">—</div>
+                            <div class="mt-4 h-2 bg-void-700 rounded-full overflow-hidden">
+                                <div id="cascade-bar" class="h-full bg-purple-500" style="width: 0%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-600 mt-1">
+                                <span>0.00</span>
+                                <span>0.50</span>
+                                <span>1.00</span>
+                            </div>
+                        </div>
+
+                        <!-- Phase Zone -->
+                        <div class="bg-void-800 rounded-xl p-6 text-center">
+                            <div class="text-xs text-gray-500 mb-2">Phase Zone</div>
+                            <div id="phase-zone" class="text-2xl font-bold text-gray-500">—</div>
+                            <div class="mt-4 grid grid-cols-3 gap-2 text-xs">
+                                <div id="zone-sub" class="p-2 bg-void-700 rounded text-gray-500">Subcritical</div>
+                                <div id="zone-crit" class="p-2 bg-void-700 rounded text-gray-500">Critical</div>
+                                <div id="zone-super" class="p-2 bg-void-700 rounded text-gray-500">Supercritical</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Chart -->
+                    <div class="mt-6 bg-void-800 rounded-xl p-4">
+                        <div class="chart-container">
+                            <canvas id="burdenChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generated Manifest -->
+            <div class="terminal rounded-xl overflow-hidden mb-8" id="manifest-section" style="display: none;">
+                <div class="px-4 py-3 border-b border-amber-500/20">
+                    <span class="font-semibold text-white">📋 Generated Manifest</span>
+                </div>
+                <div class="p-4 mono text-sm" id="manifest-content">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Terminal Output -->
+            <div class="terminal rounded-xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-amber-500/20 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-lg">💻</span>
+                        <span class="font-semibold text-white">Automation Log</span>
+                    </div>
+                    <button onclick="clearTerminal()" class="text-xs text-gray-500 hover:text-gray-300">Clear</button>
+                </div>
+                <div id="terminal-output" class="p-4 mono text-sm h-48 overflow-y-auto bg-black/50">
+                    <div class="text-gray-500">$ <span class="text-amber-400">foxfire</span> phase-2 --automation</div>
+                    <div class="text-gray-500 mt-1">Awaiting execution...</div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Navigation Footer -->
+    <footer class="border-t border-amber-500/20 py-6 px-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <span class="text-gray-500 text-sm">Phase 2 of 5</span>
+            <div class="flex space-x-4">
+                <a href="phase-1-inventory.html" class="text-blue-400 hover:text-blue-300 text-sm transition">← Phase 1</a>
+                <a href="phase-3-rituals.html" class="text-gray-600 text-sm">Phase 3 →</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ==================== DOMAIN DATA ====================
+        const domains = [
+            { name: 'CONSTRAINT', z: 0.41, pattern: 'IDENTIFICATION' },
+            { name: 'BRIDGE', z: 0.52, pattern: 'PRESERVATION' },
+            { name: 'META', z: 0.70, pattern: 'META_OBSERVATION' },
+            { name: 'RECURSION', z: 0.73, pattern: 'RECURSION' },
+            { name: 'TRIAD', z: 0.80, pattern: 'DISTRIBUTION' },
+            { name: 'EMERGENCE', z: 0.85, pattern: 'EMERGENCE' },
+            { name: 'PERSISTENCE', z: 0.87, pattern: 'PERSISTENCE' }
+        ];
+
+        let burdenChart;
+        let chartData = [];
+        let capturedCount = 0;
+        let verifiedCount = 0;
+
+        // ==================== RENDER FUNCTIONS ====================
+        function renderCaptureGrid() {
+            const grid = document.getElementById('capture-grid');
+            grid.innerHTML = domains.map((d, i) => `
+                <div id="capture-${i}" class="terminal rounded-lg p-3 border border-gray-700 opacity-50 transition-all">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs text-gray-500">${d.name}</span>
+                        <span id="capture-${i}-icon" class="text-gray-600">○</span>
+                    </div>
+                    <div class="mono text-xs text-gray-400">z=${d.z}</div>
+                    <div class="text-xs text-gray-600 truncate">${d.pattern}</div>
+                </div>
+            `).join('');
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('burdenChart').getContext('2d');
+            burdenChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'z-Coordinate',
+                        data: [],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Target (0.867)',
+                        data: [],
+                        borderColor: '#22c55e',
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            min: 0.80,
+                            max: 0.95,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#9ca3af' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // ==================== TERMINAL ====================
+        function terminalLog(message, type = 'info') {
+            const terminal = document.getElementById('terminal-output');
+            const colors = {
+                'info': 'text-gray-300',
+                'success': 'text-green-400',
+                'warning': 'text-amber-400',
+                'error': 'text-red-400',
+                'system': 'text-amber-400',
+                'data': 'text-purple-400',
+                'hash': 'text-cyan-400'
+            };
+            const line = document.createElement('div');
+            line.className = colors[type] || colors.info;
+            line.textContent = message;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function clearTerminal() {
+            document.getElementById('terminal-output').innerHTML = `
+                <div class="text-gray-500">$ <span class="text-amber-400">foxfire</span> phase-2 --automation</div>
+                <div class="text-gray-500 mt-1">Awaiting execution...</div>
+            `;
+        }
+
+        // ==================== HASH GENERATION ====================
+        function generateHash(input) {
+            let hash = 0;
+            for (let i = 0; i < input.length; i++) {
+                const char = input.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return Math.abs(hash).toString(16).padStart(16, '0').slice(0, 16);
+        }
+
+        // ==================== AUTOMATION EXECUTION ====================
+        let isRunning = false;
+
+        async function runAutomation() {
+            if (isRunning) return;
+            isRunning = true;
+
+            const runBtn = document.getElementById('run-btn');
+            runBtn.disabled = true;
+            runBtn.textContent = '⏳ Running...';
+            runBtn.className = 'px-4 py-2 bg-gray-600 rounded-lg text-sm font-semibold cursor-not-allowed';
+
+            clearTerminal();
+
+            terminalLog('═══════════════════════════════════════', 'system');
+            terminalLog('  PHASE 2: AUTOMATION PIPELINE', 'system');
+            terminalLog('═══════════════════════════════════════', 'system');
+            terminalLog('');
+
+            // Step 1: GHMP Capture
+            await runStep1();
+
+            // Step 2: Witness Regeneration
+            await runStep2();
+
+            // Step 3: Burden Update
+            await runStep3();
+
+            // Generate Manifest
+            await generateManifest();
+
+            terminalLog('');
+            terminalLog('═══════════════════════════════════════', 'system');
+            terminalLog('Phase 2: Automation COMPLETE ✓', 'success');
+            terminalLog('═══════════════════════════════════════', 'system');
+
+            runBtn.textContent = '✓ Complete';
+            runBtn.className = 'px-4 py-2 bg-green-600 rounded-lg text-sm font-semibold';
+        }
+
+        async function runStep1() {
+            const step = document.getElementById('step-1');
+            const status = document.getElementById('step-1-status');
+            const progress = document.getElementById('step-1-progress');
+
+            step.classList.add('active');
+            status.textContent = 'Running...';
+            status.className = 'mono text-xs text-amber-400';
+
+            terminalLog('[CAPTURE] Starting GHMP plate capture...', 'info');
+            await sleep(300);
+
+            capturedCount = 0;
+            for (let i = 0; i < domains.length; i++) {
+                const d = domains[i];
+                const cell = document.getElementById(`capture-${i}`);
+                const icon = document.getElementById(`capture-${i}-icon`);
+
+                cell.classList.remove('opacity-50');
+                cell.classList.add('border-amber-500');
+                icon.textContent = '●';
+                icon.className = 'text-amber-400';
+
+                terminalLog(`  [${d.name}] Captured at z=${d.z}`, 'data');
+                capturedCount++;
+                document.getElementById('capture-count').textContent = `${capturedCount}/7 captured`;
+                progress.style.width = `${(capturedCount / 7) * 100}%`;
+
+                await sleep(150);
+            }
+
+            terminalLog('[CAPTURE] 7/7 plates captured ✓', 'success');
+            step.classList.remove('active');
+            step.classList.add('complete');
+            status.textContent = 'Complete ✓';
+            status.className = 'mono text-xs text-green-400';
+        }
+
+        async function runStep2() {
+            const step = document.getElementById('step-2');
+            const status = document.getElementById('step-2-status');
+            const progress = document.getElementById('step-2-progress');
+            const witnessOutput = document.getElementById('witness-output');
+
+            await sleep(300);
+
+            step.classList.add('active');
+            status.textContent = 'Running...';
+            status.className = 'mono text-xs text-amber-400';
+
+            terminalLog('');
+            terminalLog('[WITNESS] Regenerating cryptographic witnesses...', 'info');
+
+            witnessOutput.innerHTML = '';
+            verifiedCount = 0;
+
+            for (let i = 0; i < domains.length; i++) {
+                const d = domains[i];
+                const hash = generateHash(`${d.name}:${d.z}:${d.pattern}:${Date.now()}`);
+
+                const entry = document.createElement('div');
+                entry.className = 'mb-2 p-2 bg-void-800 rounded';
+                entry.innerHTML = `
+                    <div class="text-gray-400">${d.name}</div>
+                    <div class="text-cyan-400 break-all">${hash}</div>
+                `;
+                witnessOutput.appendChild(entry);
+
+                terminalLog(`  [${d.name}] witness: ${hash}`, 'hash');
+                verifiedCount++;
+                document.getElementById('witness-count').textContent = `${verifiedCount}/7 verified`;
+                progress.style.width = `${(verifiedCount / 7) * 100}%`;
+
+                await sleep(200);
+            }
+
+            terminalLog('[WITNESS] All witnesses regenerated ✓', 'success');
+            step.classList.remove('active');
+            step.classList.add('complete');
+            status.textContent = 'Complete ✓';
+            status.className = 'mono text-xs text-green-400';
+        }
+
+        async function runStep3() {
+            const step = document.getElementById('step-3');
+            const status = document.getElementById('step-3-status');
+            const progress = document.getElementById('step-3-progress');
+
+            await sleep(300);
+
+            step.classList.add('active');
+            status.textContent = 'Running...';
+            status.className = 'mono text-xs text-amber-400';
+
+            terminalLog('');
+            terminalLog('[BURDEN] Updating burden trackers...', 'info');
+
+            // Simulate z-coordinate updates
+            const targetZ = 0.867;
+            let currentZ = 0.82;
+            chartData = [];
+
+            for (let i = 0; i < 10; i++) {
+                // Gradually approach target
+                currentZ = currentZ + (targetZ - currentZ) * 0.3 + (Math.random() - 0.5) * 0.01;
+                currentZ = Math.max(0.80, Math.min(0.95, currentZ));
+
+                chartData.push({ t: i, z: currentZ });
+
+                // Update display
+                document.getElementById('current-z').textContent = currentZ.toFixed(4);
+                document.getElementById('current-z').className = `text-4xl font-bold mono ${getZColor(currentZ)}`;
+
+                // Update z bar
+                const zPercent = ((currentZ - 0.80) / 0.15) * 100;
+                const zBar = document.getElementById('z-bar');
+                zBar.style.width = `${zPercent}%`;
+                zBar.className = `h-full burden-bar ${getZBarClass(currentZ)}`;
+
+                // Update cascade
+                const cascade = 0.5 + (i / 20) + Math.random() * 0.1;
+                document.getElementById('cascade-value').textContent = cascade.toFixed(3);
+                document.getElementById('cascade-bar').style.width = `${cascade * 100}%`;
+
+                // Update phase zone
+                updatePhaseZone(currentZ);
+
+                // Update chart
+                updateChart(i, currentZ);
+
+                progress.style.width = `${((i + 1) / 10) * 100}%`;
+
+                terminalLog(`  [t=${i}] z=${currentZ.toFixed(4)}, cascade=${cascade.toFixed(3)}`, 'data');
+                await sleep(200);
+            }
+
+            document.getElementById('burden-status').textContent = 'Optimal';
+            document.getElementById('burden-status').className = 'px-2 py-1 rounded text-xs bg-green-500/20 text-green-400';
+
+            terminalLog('[BURDEN] Trackers updated ✓', 'success');
+            step.classList.remove('active');
+            step.classList.add('complete');
+            status.textContent = 'Complete ✓';
+            status.className = 'mono text-xs text-green-400';
+        }
+
+        function getZColor(z) {
+            if (Math.abs(z - 0.867) < 0.02) return 'text-green-400';
+            if (z > 0.88) return 'text-purple-400';
+            if (z < 0.85) return 'text-blue-400';
+            return 'text-amber-400';
+        }
+
+        function getZBarClass(z) {
+            if (Math.abs(z - 0.867) < 0.02) return 'optimal';
+            if (z > 0.88 || z < 0.85) return 'warning';
+            return 'critical';
+        }
+
+        function updatePhaseZone(z) {
+            const zoneSub = document.getElementById('zone-sub');
+            const zoneCrit = document.getElementById('zone-crit');
+            const zoneSuper = document.getElementById('zone-super');
+
+            zoneSub.className = 'p-2 bg-void-700 rounded text-gray-500';
+            zoneCrit.className = 'p-2 bg-void-700 rounded text-gray-500';
+            zoneSuper.className = 'p-2 bg-void-700 rounded text-gray-500';
+
+            const zoneText = document.getElementById('phase-zone');
+
+            if (z < 0.85) {
+                zoneSub.className = 'p-2 bg-blue-500/20 rounded text-blue-400';
+                zoneText.textContent = 'SUBCRITICAL';
+                zoneText.className = 'text-2xl font-bold text-blue-400';
+            } else if (z > 0.88) {
+                zoneSuper.className = 'p-2 bg-purple-500/20 rounded text-purple-400';
+                zoneText.textContent = 'SUPERCRITICAL';
+                zoneText.className = 'text-2xl font-bold text-purple-400';
+            } else {
+                zoneCrit.className = 'p-2 bg-amber-500/20 rounded text-amber-400';
+                zoneText.textContent = 'CRITICAL';
+                zoneText.className = 'text-2xl font-bold text-amber-400';
+            }
+        }
+
+        function updateChart(t, z) {
+            burdenChart.data.labels.push(`t${t}`);
+            burdenChart.data.datasets[0].data.push(z);
+            burdenChart.data.datasets[1].data.push(0.867);
+            burdenChart.update('none');
+        }
+
+        async function generateManifest() {
+            await sleep(300);
+            terminalLog('');
+            terminalLog('[MANIFEST] Generating automation manifest...', 'info');
+
+            const manifest = {
+                phase: 2,
+                ritual: 'automation',
+                timestamp: new Date().toISOString(),
+                captures: capturedCount,
+                witnesses: verifiedCount,
+                burden: {
+                    final_z: parseFloat(document.getElementById('current-z').textContent),
+                    target_z: 0.867,
+                    zone: document.getElementById('phase-zone').textContent,
+                    status: 'OPTIMAL'
+                }
+            };
+
+            document.getElementById('manifest-section').style.display = 'block';
+            document.getElementById('manifest-content').innerHTML = `
+                <pre class="text-green-400">${JSON.stringify(manifest, null, 2)}</pre>
+            `;
+
+            terminalLog('[MANIFEST] manifest.json generated ✓', 'success');
+        }
+
+        function resetDemo() {
+            isRunning = false;
+            capturedCount = 0;
+            verifiedCount = 0;
+
+            // Reset button
+            const runBtn = document.getElementById('run-btn');
+            runBtn.disabled = false;
+            runBtn.textContent = '▶ Run Automation';
+            runBtn.className = 'px-4 py-2 bg-amber-600 hover:bg-amber-500 rounded-lg text-sm font-semibold transition';
+
+            // Reset steps
+            for (let i = 1; i <= 3; i++) {
+                const step = document.getElementById(`step-${i}`);
+                const status = document.getElementById(`step-${i}-status`);
+                const progress = document.getElementById(`step-${i}-progress`);
+
+                step.classList.remove('active', 'complete');
+                status.textContent = 'Pending';
+                status.className = 'mono text-xs text-gray-500';
+                progress.style.width = '0%';
+            }
+
+            // Reset capture grid
+            domains.forEach((_, i) => {
+                const cell = document.getElementById(`capture-${i}`);
+                const icon = document.getElementById(`capture-${i}-icon`);
+                cell.classList.add('opacity-50');
+                cell.classList.remove('border-amber-500');
+                icon.textContent = '○';
+                icon.className = 'text-gray-600';
+            });
+
+            // Reset counters
+            document.getElementById('capture-count').textContent = '0/7 captured';
+            document.getElementById('witness-count').textContent = '0/7 verified';
+            document.getElementById('witness-output').innerHTML = '<div class="text-gray-500">// Awaiting capture...</div>';
+
+            // Reset burden
+            document.getElementById('current-z').textContent = '—';
+            document.getElementById('current-z').className = 'text-4xl font-bold mono text-gray-500';
+            document.getElementById('cascade-value').textContent = '—';
+            document.getElementById('phase-zone').textContent = '—';
+            document.getElementById('phase-zone').className = 'text-2xl font-bold text-gray-500';
+            document.getElementById('z-bar').style.width = '0%';
+            document.getElementById('cascade-bar').style.width = '0%';
+            document.getElementById('burden-status').textContent = 'Idle';
+            document.getElementById('burden-status').className = 'px-2 py-1 rounded text-xs bg-gray-700 text-gray-400';
+
+            // Reset zones
+            ['zone-sub', 'zone-crit', 'zone-super'].forEach(id => {
+                document.getElementById(id).className = 'p-2 bg-void-700 rounded text-gray-500';
+            });
+
+            // Reset chart
+            burdenChart.data.labels = [];
+            burdenChart.data.datasets[0].data = [];
+            burdenChart.data.datasets[1].data = [];
+            burdenChart.update();
+
+            // Hide manifest
+            document.getElementById('manifest-section').style.display = 'none';
+
+            clearTerminal();
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ==================== INITIALIZE ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCaptureGrid();
+            initChart();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 4: Verification | Foxfire Cybernetics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        foxfire: {
+                            400: '#f19248',
+                            500: '#ed7424',
+                            600: '#de5a1a',
+                        },
+                        ember: {
+                            500: '#ff6b35',
+                            600: '#f7520e',
+                        },
+                        void: {
+                            900: '#0a0a0f',
+                            800: '#12121a',
+                            700: '#1a1a24',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #1a1a24 100%);
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        .foxfire-glow {
+            box-shadow: 0 0 20px rgba(237, 116, 36, 0.3), 0 0 40px rgba(237, 116, 36, 0.1);
+        }
+        .green-glow {
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3), 0 0 40px rgba(34, 197, 94, 0.1);
+        }
+
+        .terminal {
+            background: linear-gradient(180deg, #1a1a24 0%, #12121a 100%);
+            border: 1px solid rgba(237, 116, 36, 0.3);
+        }
+
+        .code-block {
+            background: #0a0a0f;
+            border-left: 3px solid #22c55e;
+        }
+
+        /* Verification scan animation */
+        .scan-line {
+            animation: scan 2s linear infinite;
+        }
+        @keyframes scan {
+            0% { transform: translateY(-100%); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100%); opacity: 0; }
+        }
+
+        /* Hash verification */
+        .hash-verify {
+            animation: hash-flash 0.5s ease-out;
+        }
+        @keyframes hash-flash {
+            0% { background-color: rgba(34, 197, 94, 0.5); }
+            100% { background-color: transparent; }
+        }
+
+        /* Checkmark animation */
+        .check-animate {
+            animation: check-pop 0.3s ease-out;
+        }
+        @keyframes check-pop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #12121a; }
+        ::-webkit-scrollbar-thumb { background: #22c55e; border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen text-gray-100">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-void-900/90 backdrop-blur-md border-b border-green-500/20">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-400 hover:text-white transition">&larr; Manual</a>
+                    <span class="text-green-500">|</span>
+                    <span class="mono text-green-400">PHASE 4: VERIFICATION</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="phase-3-rituals.html" class="text-gray-400 hover:text-green-400 transition text-sm">&larr; Phase 3</a>
+                    <span class="text-gray-600">|</span>
+                    <a href="phase-5-elevation.html" class="text-gray-400 hover:text-green-400 transition text-sm">Phase 5 &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-24 pb-12 px-4 max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center space-x-2 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full mb-6">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="mono text-xs text-green-400">CADENCE: POST-BUILD | VALIDATION_PROTOCOL</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                Phase 4: <span class="text-green-400">Verification</span>
+            </h1>
+            <p class="text-gray-400 max-w-2xl mx-auto">
+                Decode GHMP plates, validate ceremony logs, and generate comprehensive observation records.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- GHMP Plate Decoder -->
+            <div class="terminal rounded-xl overflow-hidden green-glow">
+                <div class="px-6 py-4 border-b border-green-500/20 flex items-center justify-between">
+                    <h3 class="font-bold text-white">GHMP Plate Decoder</h3>
+                    <button id="startDecode" class="px-3 py-1 bg-green-600 hover:bg-green-500 rounded text-xs transition">
+                        Decode All
+                    </button>
+                </div>
+                <div class="p-6">
+                    <!-- Plate Grid -->
+                    <div class="grid grid-cols-4 gap-3 mb-6" id="plateGrid">
+                        <div class="plate-item bg-void-800/50 rounded-lg p-3 text-center" data-plate="constraint">
+                            <div class="text-2xl mb-1">📋</div>
+                            <div class="text-xs text-gray-400 mono">CONSTRAINT</div>
+                            <div class="mt-2 text-xs text-gray-600" id="plate-constraint">-</div>
+                        </div>
+                        <div class="plate-item bg-void-800/50 rounded-lg p-3 text-center" data-plate="bridge">
+                            <div class="text-2xl mb-1">🌉</div>
+                            <div class="text-xs text-gray-400 mono">BRIDGE</div>
+                            <div class="mt-2 text-xs text-gray-600" id="plate-bridge">-</div>
+                        </div>
+                        <div class="plate-item bg-void-800/50 rounded-lg p-3 text-center" data-plate="meta">
+                            <div class="text-2xl mb-1">🔮</div>
+                            <div class="text-xs text-gray-400 mono">META</div>
+                            <div class="mt-2 text-xs text-gray-600" id="plate-meta">-</div>
+                        </div>
+                        <div class="plate-item bg-void-800/50 rounded-lg p-3 text-center" data-plate="recursion">
+                            <div class="text-2xl mb-1">🔄</div>
+                            <div class="text-xs text-gray-400 mono">RECURSION</div>
+                            <div class="mt-2 text-xs text-gray-600" id="plate-recursion">-</div>
+                        </div>
+                        <div class="plate-item bg-void-800/50 rounded-lg p-3 text-center" data-plate="triad">
+                            <div class="text-2xl mb-1">🔺</div>
+                            <div class="text-xs text-gray-400 mono">TRIAD</div>
+                            <div class="mt-2 text-xs text-gray-600" id="plate-triad">-</div>
+                        </div>
+                        <div class="plate-item bg-void-800/50 rounded-lg p-3 text-center" data-plate="emergence">
+                            <div class="text-2xl mb-1">✨</div>
+                            <div class="text-xs text-gray-400 mono">EMERGENCE</div>
+                            <div class="mt-2 text-xs text-gray-600" id="plate-emergence">-</div>
+                        </div>
+                        <div class="plate-item bg-void-800/50 rounded-lg p-3 text-center" data-plate="persistence">
+                            <div class="text-2xl mb-1">💾</div>
+                            <div class="text-xs text-gray-400 mono">PERSIST</div>
+                            <div class="mt-2 text-xs text-gray-600" id="plate-persistence">-</div>
+                        </div>
+                        <div class="plate-item bg-void-800/50 rounded-lg p-3 text-center border border-green-500/30" data-plate="super">
+                            <div class="text-2xl mb-1">🌀</div>
+                            <div class="text-xs text-green-400 mono">SUPER</div>
+                            <div class="mt-2 text-xs text-gray-600" id="plate-super">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Decode Output -->
+                    <div class="bg-black rounded-lg p-4 mono text-xs h-40 overflow-y-auto" id="decodeOutput">
+                        <div class="text-gray-500"># GHMP Plate Decoder v2.1</div>
+                        <div class="text-gray-500"># Awaiting decode command...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ceremony Log Validator -->
+            <div class="terminal rounded-xl overflow-hidden">
+                <div class="px-6 py-4 border-b border-foxfire-500/20 flex items-center justify-between">
+                    <h3 class="font-bold text-white">Ceremony Log Validator</h3>
+                    <button id="startValidate" class="px-3 py-1 bg-foxfire-600 hover:bg-foxfire-500 rounded text-xs transition">
+                        Validate
+                    </button>
+                </div>
+                <div class="p-6">
+                    <!-- Validation Checklist -->
+                    <div class="space-y-3 mb-6" id="validationList">
+                        <div class="flex items-center space-x-3 p-3 bg-void-800/50 rounded-lg" id="v-check-1">
+                            <div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center" id="v-icon-1">
+                                <span class="text-gray-500 text-xs">1</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-white text-sm">Ceremony Timestamp Integrity</div>
+                                <div class="text-xs text-gray-500">Verify monotonic time progression</div>
+                            </div>
+                            <span id="v-status-1" class="text-gray-500 text-xs">Pending</span>
+                        </div>
+
+                        <div class="flex items-center space-x-3 p-3 bg-void-800/50 rounded-lg" id="v-check-2">
+                            <div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center" id="v-icon-2">
+                                <span class="text-gray-500 text-xs">2</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-white text-sm">Hash Chain Continuity</div>
+                                <div class="text-xs text-gray-500">Validate witness hash links</div>
+                            </div>
+                            <span id="v-status-2" class="text-gray-500 text-xs">Pending</span>
+                        </div>
+
+                        <div class="flex items-center space-x-3 p-3 bg-void-800/50 rounded-lg" id="v-check-3">
+                            <div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center" id="v-icon-3">
+                                <span class="text-gray-500 text-xs">3</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-white text-sm">z-Coordinate Bounds</div>
+                                <div class="text-xs text-gray-500">Confirm z stays within [0.0, 1.0]</div>
+                            </div>
+                            <span id="v-status-3" class="text-gray-500 text-xs">Pending</span>
+                        </div>
+
+                        <div class="flex items-center space-x-3 p-3 bg-void-800/50 rounded-lg" id="v-check-4">
+                            <div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center" id="v-icon-4">
+                                <span class="text-gray-500 text-xs">4</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-white text-sm">Domain Coupling Validity</div>
+                                <div class="text-xs text-gray-500">Check K_ij matrices for consistency</div>
+                            </div>
+                            <span id="v-status-4" class="text-gray-500 text-xs">Pending</span>
+                        </div>
+
+                        <div class="flex items-center space-x-3 p-3 bg-void-800/50 rounded-lg" id="v-check-5">
+                            <div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center" id="v-icon-5">
+                                <span class="text-gray-500 text-xs">5</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-white text-sm">Cascade Potential Analysis</div>
+                                <div class="text-xs text-gray-500">Verify cascade values &lt; 1.0</div>
+                            </div>
+                            <span id="v-status-5" class="text-gray-500 text-xs">Pending</span>
+                        </div>
+                    </div>
+
+                    <!-- Validation Summary -->
+                    <div class="bg-void-800/50 rounded-lg p-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Validation Status:</span>
+                            <span id="overallStatus" class="mono text-sm text-gray-500">Awaiting validation</span>
+                        </div>
+                        <div class="mt-3 h-2 bg-void-900 rounded-full overflow-hidden">
+                            <div id="validationProgress" class="h-full bg-green-500 transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Observation Record Generator -->
+        <div class="terminal rounded-xl overflow-hidden mb-12">
+            <div class="px-6 py-4 border-b border-green-500/20 flex items-center justify-between">
+                <h3 class="font-bold text-white">Observation Record Generator</h3>
+                <button id="generateRecord" class="px-3 py-1 bg-green-600 hover:bg-green-500 rounded text-xs transition">
+                    Generate Record
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Record Preview -->
+                    <div>
+                        <h4 class="text-gray-400 text-sm mb-3">Record Preview</h4>
+                        <div class="bg-black rounded-lg p-4 mono text-xs h-80 overflow-y-auto" id="recordPreview">
+                            <div class="text-gray-500"># Observation record will appear here...</div>
+                        </div>
+                    </div>
+
+                    <!-- Record Metrics -->
+                    <div>
+                        <h4 class="text-gray-400 text-sm mb-3">Record Metrics</h4>
+                        <div class="space-y-4">
+                            <div class="bg-void-800/50 rounded-lg p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-gray-400">Ceremony Hash</span>
+                                    <span id="metricHash" class="mono text-xs text-gray-600">-</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-gray-400">Plates Verified</span>
+                                    <span id="metricPlates" class="mono text-xs text-gray-600">0/7</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-gray-400">Validation Checks</span>
+                                    <span id="metricChecks" class="mono text-xs text-gray-600">0/5</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-400">z-Coordinate</span>
+                                    <span id="metricZ" class="mono text-xs text-gray-600">-</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-void-800/50 rounded-lg p-4">
+                                <div class="text-green-400 font-semibold mb-3">Record Status</div>
+                                <div id="recordStatus" class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-gray-600 rounded-full"></div>
+                                    <span class="text-gray-500 text-sm">Not generated</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-void-800/50 rounded-lg p-4">
+                                <div class="text-foxfire-400 font-semibold mb-3">Cascade Report</div>
+                                <div class="grid grid-cols-3 gap-2 text-center">
+                                    <div>
+                                        <div id="cascadeMin" class="text-lg font-bold text-blue-400">-</div>
+                                        <div class="text-xs text-gray-500">Min</div>
+                                    </div>
+                                    <div>
+                                        <div id="cascadeAvg" class="text-lg font-bold text-amber-400">-</div>
+                                        <div class="text-xs text-gray-500">Avg</div>
+                                    </div>
+                                    <div>
+                                        <div id="cascadeMax" class="text-lg font-bold text-green-400">-</div>
+                                        <div class="text-xs text-gray-500">Max</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Code Scaffolding -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- GHMP Decoder Script -->
+            <div class="terminal rounded-xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-green-500/20 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-green-400">&#128196;</span>
+                        <span class="mono text-sm text-white">ghmp_decoder.py</span>
+                    </div>
+                    <span class="text-xs text-gray-500">scaffolding</span>
+                </div>
+                <div class="p-4 overflow-x-auto">
+                    <pre class="mono text-xs"><code class="language-python"><span class="text-gray-500">#!/usr/bin/env python3</span>
+<span class="text-gray-500">"""
+GHMP Plate Decoder
+Phase 4: Decode and validate geometric hash map plates
+"""</span>
+
+<span class="text-purple-400">import</span> json
+<span class="text-purple-400">import</span> struct
+<span class="text-purple-400">import</span> hashlib
+<span class="text-purple-400">from</span> pathlib <span class="text-purple-400">import</span> Path
+<span class="text-purple-400">from</span> typing <span class="text-purple-400">import</span> Dict, Optional
+
+<span class="text-amber-400">DOMAINS</span> = [
+    <span class="text-green-400">"CONSTRAINT"</span>, <span class="text-green-400">"BRIDGE"</span>, <span class="text-green-400">"META"</span>,
+    <span class="text-green-400">"RECURSION"</span>, <span class="text-green-400">"TRIAD"</span>, <span class="text-green-400">"EMERGENCE"</span>,
+    <span class="text-green-400">"PERSISTENCE"</span>
+]
+
+<span class="text-purple-400">class</span> <span class="text-amber-400">GHMPDecoder</span>:
+    <span class="text-purple-400">def</span> <span class="text-blue-400">__init__</span>(<span class="text-red-400">self</span>, plates_dir: <span class="text-amber-400">str</span> = <span class="text-green-400">"plates/"</span>):
+        <span class="text-red-400">self</span>.plates_dir = Path(plates_dir)
+        <span class="text-red-400">self</span>.decoded_plates = {}
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">decode_plate</span>(<span class="text-red-400">self</span>, domain: <span class="text-amber-400">str</span>) -> Optional[Dict]:
+        <span class="text-gray-500">"""Decode a single GHMP plate."""</span>
+        plate_path = <span class="text-red-400">self</span>.plates_dir / <span class="text-green-400">f"{domain.lower()}.ghmp"</span>
+
+        <span class="text-purple-400">if</span> <span class="text-purple-400">not</span> plate_path.exists():
+            <span class="text-purple-400">return</span> <span class="text-amber-400">None</span>
+
+        <span class="text-purple-400">with</span> <span class="text-amber-400">open</span>(plate_path, <span class="text-green-400">"rb"</span>) <span class="text-purple-400">as</span> f:
+            <span class="text-gray-500"># Read header: magic (4B) + version (2B) + z (4B)</span>
+            header = f.read(<span class="text-amber-400">10</span>)
+            magic, version, z_raw = struct.unpack(<span class="text-green-400">"&lt;4sHf"</span>, header)
+
+            <span class="text-purple-400">if</span> magic != <span class="text-green-400">b"GHMP"</span>:
+                <span class="text-purple-400">raise</span> <span class="text-amber-400">ValueError</span>(<span class="text-green-400">f"Invalid plate magic: {magic}"</span>)
+
+            <span class="text-gray-500"># Read payload</span>
+            payload = f.read()
+            payload_hash = hashlib.sha256(payload).hexdigest()[:16]
+
+        decoded = {
+            <span class="text-green-400">"domain"</span>: domain,
+            <span class="text-green-400">"version"</span>: version,
+            <span class="text-green-400">"z_coordinate"</span>: <span class="text-amber-400">round</span>(z_raw, <span class="text-amber-400">4</span>),
+            <span class="text-green-400">"payload_hash"</span>: payload_hash,
+            <span class="text-green-400">"payload_size"</span>: <span class="text-amber-400">len</span>(payload)
+        }
+
+        <span class="text-red-400">self</span>.decoded_plates[domain] = decoded
+        <span class="text-purple-400">return</span> decoded
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">decode_all</span>(<span class="text-red-400">self</span>) -> Dict:
+        <span class="text-gray-500">"""Decode all domain plates."""</span>
+        results = {}
+        <span class="text-purple-400">for</span> domain <span class="text-purple-400">in</span> DOMAINS:
+            result = <span class="text-red-400">self</span>.decode_plate(domain)
+            <span class="text-purple-400">if</span> result:
+                results[domain] = result
+        <span class="text-purple-400">return</span> results
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">verify_integrity</span>(<span class="text-red-400">self</span>) -> <span class="text-amber-400">bool</span>:
+        <span class="text-gray-500">"""Verify all plates have valid z-coordinates."""</span>
+        <span class="text-purple-400">for</span> domain, plate <span class="text-purple-400">in</span> <span class="text-red-400">self</span>.decoded_plates.items():
+            z = plate[<span class="text-green-400">"z_coordinate"</span>]
+            <span class="text-purple-400">if</span> <span class="text-purple-400">not</span> (<span class="text-amber-400">0.0</span> <= z <= <span class="text-amber-400">1.0</span>):
+                <span class="text-purple-400">return</span> <span class="text-amber-400">False</span>
+        <span class="text-purple-400">return</span> <span class="text-amber-400">True</span>
+
+<span class="text-purple-400">if</span> __name__ == <span class="text-green-400">"__main__"</span>:
+    decoder = GHMPDecoder()
+    plates = decoder.decode_all()
+
+    <span class="text-purple-400">for</span> domain, data <span class="text-purple-400">in</span> plates.items():
+        <span class="text-amber-400">print</span>(<span class="text-green-400">f"[{domain}] z={data['z_coordinate']} hash={data['payload_hash']}"</span>)
+
+    <span class="text-purple-400">if</span> decoder.verify_integrity():
+        <span class="text-amber-400">print</span>(<span class="text-green-400">"All plates verified successfully"</span>)</code></pre>
+                </div>
+            </div>
+
+            <!-- Observation Record Script -->
+            <div class="terminal rounded-xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-foxfire-500/20 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-foxfire-400">&#128196;</span>
+                        <span class="mono text-sm text-white">observation_recorder.py</span>
+                    </div>
+                    <span class="text-xs text-gray-500">scaffolding</span>
+                </div>
+                <div class="p-4 overflow-x-auto">
+                    <pre class="mono text-xs"><code class="language-python"><span class="text-gray-500">#!/usr/bin/env python3</span>
+<span class="text-gray-500">"""
+Observation Record Generator
+Phase 4: Generate comprehensive verification reports
+"""</span>
+
+<span class="text-purple-400">import</span> json
+<span class="text-purple-400">import</span> hashlib
+<span class="text-purple-400">from</span> datetime <span class="text-purple-400">import</span> datetime
+<span class="text-purple-400">from</span> typing <span class="text-purple-400">import</span> Dict, List
+<span class="text-purple-400">from</span> pathlib <span class="text-purple-400">import</span> Path
+
+<span class="text-purple-400">class</span> <span class="text-amber-400">ObservationRecorder</span>:
+    <span class="text-purple-400">def</span> <span class="text-blue-400">__init__</span>(<span class="text-red-400">self</span>):
+        <span class="text-red-400">self</span>.timestamp = datetime.utcnow()
+        <span class="text-red-400">self</span>.observations = []
+        <span class="text-red-400">self</span>.metrics = {}
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">record_plate_verification</span>(<span class="text-red-400">self</span>, plates: Dict):
+        <span class="text-gray-500">"""Record GHMP plate verification results."""</span>
+        <span class="text-red-400">self</span>.observations.append({
+            <span class="text-green-400">"type"</span>: <span class="text-green-400">"plate_verification"</span>,
+            <span class="text-green-400">"timestamp"</span>: datetime.utcnow().isoformat(),
+            <span class="text-green-400">"plates_verified"</span>: <span class="text-amber-400">len</span>(plates),
+            <span class="text-green-400">"plate_summary"</span>: {
+                d: p[<span class="text-green-400">"z_coordinate"</span>] <span class="text-purple-400">for</span> d, p <span class="text-purple-400">in</span> plates.items()
+            }
+        })
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">record_validation</span>(<span class="text-red-400">self</span>, checks: List[Dict]):
+        <span class="text-gray-500">"""Record validation check results."""</span>
+        passed = <span class="text-amber-400">sum</span>(<span class="text-amber-400">1</span> <span class="text-purple-400">for</span> c <span class="text-purple-400">in</span> checks <span class="text-purple-400">if</span> c[<span class="text-green-400">"passed"</span>])
+        <span class="text-red-400">self</span>.observations.append({
+            <span class="text-green-400">"type"</span>: <span class="text-green-400">"validation"</span>,
+            <span class="text-green-400">"timestamp"</span>: datetime.utcnow().isoformat(),
+            <span class="text-green-400">"checks_passed"</span>: passed,
+            <span class="text-green-400">"checks_total"</span>: <span class="text-amber-400">len</span>(checks),
+            <span class="text-green-400">"details"</span>: checks
+        })
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">compute_cascade_metrics</span>(<span class="text-red-400">self</span>, z_values: List[<span class="text-amber-400">float</span>]):
+        <span class="text-gray-500">"""Compute cascade potential metrics."""</span>
+        <span class="text-purple-400">if</span> <span class="text-purple-400">not</span> z_values:
+            <span class="text-purple-400">return</span>
+
+        <span class="text-red-400">self</span>.metrics[<span class="text-green-400">"cascade"</span>] = {
+            <span class="text-green-400">"min"</span>: <span class="text-amber-400">min</span>(z_values),
+            <span class="text-green-400">"max"</span>: <span class="text-amber-400">max</span>(z_values),
+            <span class="text-green-400">"avg"</span>: <span class="text-amber-400">sum</span>(z_values) / <span class="text-amber-400">len</span>(z_values),
+            <span class="text-green-400">"count"</span>: <span class="text-amber-400">len</span>(z_values)
+        }
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">generate_record</span>(<span class="text-red-400">self</span>) -> Dict:
+        <span class="text-gray-500">"""Generate complete observation record."""</span>
+        record = {
+            <span class="text-green-400">"record_id"</span>: <span class="text-red-400">self</span>._generate_id(),
+            <span class="text-green-400">"generated_at"</span>: <span class="text-red-400">self</span>.timestamp.isoformat(),
+            <span class="text-green-400">"observations"</span>: <span class="text-red-400">self</span>.observations,
+            <span class="text-green-400">"metrics"</span>: <span class="text-red-400">self</span>.metrics,
+            <span class="text-green-400">"status"</span>: <span class="text-red-400">self</span>._compute_status()
+        }
+        <span class="text-purple-400">return</span> record
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">_generate_id</span>(<span class="text-red-400">self</span>) -> <span class="text-amber-400">str</span>:
+        <span class="text-gray-500">"""Generate unique record ID."""</span>
+        data = json.dumps(<span class="text-red-400">self</span>.observations)
+        <span class="text-purple-400">return</span> hashlib.sha256(data.encode()).hexdigest()[:16]
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">_compute_status</span>(<span class="text-red-400">self</span>) -> <span class="text-amber-400">str</span>:
+        <span class="text-gray-500">"""Compute overall verification status."""</span>
+        <span class="text-purple-400">for</span> obs <span class="text-purple-400">in</span> <span class="text-red-400">self</span>.observations:
+            <span class="text-purple-400">if</span> obs[<span class="text-green-400">"type"</span>] == <span class="text-green-400">"validation"</span>:
+                <span class="text-purple-400">if</span> obs[<span class="text-green-400">"checks_passed"</span>] < obs[<span class="text-green-400">"checks_total"</span>]:
+                    <span class="text-purple-400">return</span> <span class="text-green-400">"PARTIAL"</span>
+        <span class="text-purple-400">return</span> <span class="text-green-400">"COMPLETE"</span>
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">save_record</span>(<span class="text-red-400">self</span>, output_dir: <span class="text-amber-400">str</span> = <span class="text-green-400">"observations/"</span>):
+        <span class="text-gray-500">"""Save record to disk."""</span>
+        output = Path(output_dir)
+        output.mkdir(exist_ok=<span class="text-amber-400">True</span>)
+
+        record = <span class="text-red-400">self</span>.generate_record()
+        filename = <span class="text-green-400">f"obs_{record['record_id']}.json"</span>
+
+        <span class="text-purple-400">with</span> <span class="text-amber-400">open</span>(output / filename, <span class="text-green-400">"w"</span>) <span class="text-purple-400">as</span> f:
+            json.dump(record, f, indent=<span class="text-amber-400">2</span>)
+
+        <span class="text-purple-400">return</span> filename</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase Summary -->
+        <div class="terminal rounded-xl p-6 green-glow">
+            <h3 class="font-bold text-white text-lg mb-4">Phase 4 Summary</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+                <div>
+                    <div id="totalPlates" class="text-3xl font-bold text-green-400">0</div>
+                    <div class="text-gray-500 text-sm">Plates Decoded</div>
+                </div>
+                <div>
+                    <div id="totalChecks" class="text-3xl font-bold text-foxfire-400">0</div>
+                    <div class="text-gray-500 text-sm">Checks Passed</div>
+                </div>
+                <div>
+                    <div id="totalRecords" class="text-3xl font-bold text-purple-400">0</div>
+                    <div class="text-gray-500 text-sm">Records Generated</div>
+                </div>
+                <div>
+                    <div id="verifyStatus" class="text-3xl font-bold text-gray-600">-</div>
+                    <div class="text-gray-500 text-sm">Status</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // State
+        let decodedPlates = 0;
+        let passedChecks = 0;
+        let generatedRecords = 0;
+
+        // Plate Decoder
+        document.getElementById('startDecode').addEventListener('click', function() {
+            this.disabled = true;
+            this.textContent = 'Decoding...';
+
+            const output = document.getElementById('decodeOutput');
+            output.innerHTML = '<div class="text-green-400">> python ghmp_decoder.py --all</div>';
+
+            const plates = ['constraint', 'bridge', 'meta', 'recursion', 'triad', 'emergence', 'persistence', 'super'];
+            let idx = 0;
+
+            const decodePlate = () => {
+                if (idx >= plates.length) {
+                    decodedPlates = plates.length;
+                    document.getElementById('totalPlates').textContent = decodedPlates;
+                    output.innerHTML += '<div class="text-green-400 mt-2">All plates decoded successfully!</div>';
+
+                    this.disabled = false;
+                    this.textContent = 'Decode All';
+                    return;
+                }
+
+                const plate = plates[idx];
+                const z = (0.941 + (idx * 0.007)).toFixed(3);
+                const hash = Array.from({length: 8}, () => '0123456789abcdef'[Math.floor(Math.random()*16)]).join('');
+
+                // Update plate display
+                const plateEl = document.getElementById('plate-' + plate);
+                plateEl.textContent = 'z=' + z;
+                plateEl.className = 'mt-2 text-xs text-green-400';
+                plateEl.parentElement.classList.add('hash-verify');
+
+                // Update output
+                output.innerHTML += `<div class="text-gray-400">[${plate.toUpperCase()}] z=${z} hash=${hash}</div>`;
+                output.scrollTop = output.scrollHeight;
+
+                idx++;
+                setTimeout(decodePlate, 300);
+            };
+
+            setTimeout(decodePlate, 500);
+        });
+
+        // Ceremony Validator
+        document.getElementById('startValidate').addEventListener('click', function() {
+            this.disabled = true;
+            this.textContent = 'Validating...';
+
+            let checkIdx = 0;
+
+            const runCheck = () => {
+                if (checkIdx >= 5) {
+                    passedChecks = 5;
+                    document.getElementById('totalChecks').textContent = passedChecks;
+                    document.getElementById('overallStatus').textContent = 'All checks passed';
+                    document.getElementById('overallStatus').className = 'mono text-sm text-green-400';
+                    document.getElementById('validationProgress').style.width = '100%';
+
+                    this.disabled = false;
+                    this.textContent = 'Validate';
+                    return;
+                }
+
+                const idx = checkIdx + 1;
+                const iconEl = document.getElementById('v-icon-' + idx);
+                const statusEl = document.getElementById('v-status-' + idx);
+
+                // Update icon
+                iconEl.innerHTML = '<span class="text-green-400 check-animate">&#10003;</span>';
+                iconEl.className = 'w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center';
+
+                // Update status
+                statusEl.textContent = 'Passed';
+                statusEl.className = 'text-green-400 text-xs';
+
+                // Update progress
+                document.getElementById('validationProgress').style.width = ((checkIdx + 1) * 20) + '%';
+
+                checkIdx++;
+                setTimeout(runCheck, 400);
+            };
+
+            setTimeout(runCheck, 300);
+        });
+
+        // Observation Record Generator
+        document.getElementById('generateRecord').addEventListener('click', function() {
+            this.disabled = true;
+            this.textContent = 'Generating...';
+
+            const preview = document.getElementById('recordPreview');
+            const recordId = Array.from({length: 16}, () => '0123456789abcdef'[Math.floor(Math.random()*16)]).join('');
+            const timestamp = new Date().toISOString();
+
+            const record = {
+                record_id: recordId,
+                generated_at: timestamp,
+                observations: [
+                    {
+                        type: "plate_verification",
+                        plates_verified: 7,
+                        plate_summary: {
+                            CONSTRAINT: 0.941,
+                            BRIDGE: 0.952,
+                            META: 0.970,
+                            RECURSION: 0.973,
+                            TRIAD: 0.980,
+                            EMERGENCE: 0.985,
+                            PERSISTENCE: 0.987
+                        }
+                    },
+                    {
+                        type: "validation",
+                        checks_passed: 5,
+                        checks_total: 5
+                    }
+                ],
+                metrics: {
+                    cascade: {
+                        min: 0.941,
+                        max: 0.987,
+                        avg: 0.970
+                    }
+                },
+                status: "COMPLETE"
+            };
+
+            preview.innerHTML = '<pre class="text-green-400">' + JSON.stringify(record, null, 2) + '</pre>';
+
+            // Update metrics
+            document.getElementById('metricHash').textContent = recordId;
+            document.getElementById('metricHash').className = 'mono text-xs text-green-400';
+            document.getElementById('metricPlates').textContent = '7/7';
+            document.getElementById('metricPlates').className = 'mono text-xs text-green-400';
+            document.getElementById('metricChecks').textContent = '5/5';
+            document.getElementById('metricChecks').className = 'mono text-xs text-green-400';
+            document.getElementById('metricZ').textContent = '0.970';
+            document.getElementById('metricZ').className = 'mono text-xs text-purple-400';
+
+            // Update cascade metrics
+            document.getElementById('cascadeMin').textContent = '0.941';
+            document.getElementById('cascadeAvg').textContent = '0.970';
+            document.getElementById('cascadeMax').textContent = '0.987';
+
+            // Update record status
+            document.getElementById('recordStatus').innerHTML = `
+                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-green-400 text-sm">Generated: obs_${recordId.slice(0,8)}.json</span>
+            `;
+
+            // Update totals
+            generatedRecords++;
+            document.getElementById('totalRecords').textContent = generatedRecords;
+            document.getElementById('verifyStatus').textContent = 'OK';
+            document.getElementById('verifyStatus').className = 'text-3xl font-bold text-green-400';
+
+            this.disabled = false;
+            this.textContent = 'Generate Record';
+        });
+    </script>
+</body>
+</html>

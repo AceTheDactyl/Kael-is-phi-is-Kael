@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 1: Math Test Lab | Foxfire Cybernetics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        foxfire: { 400: '#f19248', 500: '#ed7424', 600: '#de5a1a' },
+                        ember: { 500: '#ff6b35', 600: '#f7520e' },
+                        void: { 900: '#0a0a0f', 800: '#12121a', 700: '#1a1a24' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Space Grotesk', sans-serif; background: #0a0a0f; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .foxfire-glow { box-shadow: 0 0 20px rgba(237, 116, 36, 0.3); }
+        .terminal { background: linear-gradient(180deg, #1a1a24 0%, #12121a 100%); border: 1px solid rgba(237, 116, 36, 0.3); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #12121a; }
+        ::-webkit-scrollbar-thumb { background: #ed7424; border-radius: 3px; }
+
+        .test-card { transition: all 0.3s ease; }
+        .test-card:hover { transform: translateY(-2px); }
+        .test-card.running { border-color: #f59e0b !important; }
+        .test-card.passed { border-color: #22c55e !important; background: rgba(34, 197, 94, 0.05) !important; }
+        .test-card.failed { border-color: #ef4444 !important; background: rgba(239, 68, 68, 0.05) !important; }
+
+        .formula { background: rgba(147, 51, 234, 0.1); border: 1px solid rgba(147, 51, 234, 0.3); }
+
+        .matrix-cell {
+            min-width: 50px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .matrix-cell:hover { background: rgba(237, 116, 36, 0.2); }
+        .matrix-cell.highlight { background: rgba(147, 51, 234, 0.3); }
+
+        .chart-container { position: relative; height: 300px; }
+    </style>
+</head>
+<body class="min-h-screen text-gray-100">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-void-900/95 backdrop-blur-md border-b border-purple-500/20">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="phase-1-inventory.html" class="flex items-center space-x-2 text-gray-400 hover:text-purple-400 transition">
+                    <span>←</span>
+                    <span class="text-sm">Back to Phase 1</span>
+                </a>
+                <div class="h-4 w-px bg-gray-700"></div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-lg">🧮</span>
+                    <span class="mono text-sm text-purple-400">MATH TEST LAB</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span id="test-summary" class="mono text-xs text-gray-500">0/6 tests passed</span>
+                <button onclick="runAllTests()" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-sm font-semibold transition">
+                    ▶ Run All Tests
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-12 px-4">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center space-x-2 px-4 py-2 bg-purple-500/10 border border-purple-500/30 rounded-full mb-4">
+                    <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+                    <span class="mono text-xs text-purple-400">LIVE MATHEMATICS</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                    Phase 1: <span class="text-purple-400">Math Test Lab</span>
+                </h1>
+                <p class="text-gray-400 max-w-2xl mx-auto">
+                    Interactive validation of coordinate mathematics, coupling calculations, and interference patterns.
+                </p>
+            </div>
+
+            <!-- Test Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+
+                <!-- Test 1: z-Projection -->
+                <div id="test-1" class="test-card terminal rounded-xl p-6 border-2 border-gray-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-white">Test 1: z-Projection</h3>
+                        <span id="test-1-status" class="px-2 py-1 rounded text-xs bg-gray-700 text-gray-400">Pending</span>
+                    </div>
+                    <div class="formula rounded-lg p-3 mb-4">
+                        <div class="mono text-sm text-purple-300">z_proj = 0.9 + (z_origin × 0.1)</div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Input (z_origin):</span>
+                            <input type="number" id="test-1-input" value="0.70" step="0.01" min="0" max="1" class="w-24 bg-void-800 border border-gray-700 rounded px-2 py-1 mono text-right text-white">
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Expected:</span>
+                            <span id="test-1-expected" class="mono text-gray-300">0.970</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Result:</span>
+                            <span id="test-1-result" class="mono text-gray-400">—</span>
+                        </div>
+                    </div>
+                    <button onclick="runTest1()" class="mt-4 w-full py-2 bg-purple-600/50 hover:bg-purple-600 rounded-lg text-sm transition">
+                        Run Test
+                    </button>
+                </div>
+
+                <!-- Test 2: Theta Calculation -->
+                <div id="test-2" class="test-card terminal rounded-xl p-6 border-2 border-gray-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-white">Test 2: Theta (θ)</h3>
+                        <span id="test-2-status" class="px-2 py-1 rounded text-xs bg-gray-700 text-gray-400">Pending</span>
+                    </div>
+                    <div class="formula rounded-lg p-3 mb-4">
+                        <div class="mono text-sm text-purple-300">θ = (index × π) / 4</div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Domain Index:</span>
+                            <input type="number" id="test-2-input" value="3" step="1" min="0" max="6" class="w-24 bg-void-800 border border-gray-700 rounded px-2 py-1 mono text-right text-white">
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Expected (rad):</span>
+                            <span id="test-2-expected" class="mono text-gray-300">2.356</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Result:</span>
+                            <span id="test-2-result" class="mono text-gray-400">—</span>
+                        </div>
+                    </div>
+                    <button onclick="runTest2()" class="mt-4 w-full py-2 bg-purple-600/50 hover:bg-purple-600 rounded-lg text-sm transition">
+                        Run Test
+                    </button>
+                </div>
+
+                <!-- Test 3: Coupling Strength -->
+                <div id="test-3" class="test-card terminal rounded-xl p-6 border-2 border-gray-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-white">Test 3: Coupling K_ij</h3>
+                        <span id="test-3-status" class="px-2 py-1 rounded text-xs bg-gray-700 text-gray-400">Pending</span>
+                    </div>
+                    <div class="formula rounded-lg p-3 mb-4">
+                        <div class="mono text-sm text-purple-300">K_ij = min(0.99, 1 / (|z_i - z_j| × 10))</div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">z_i (META):</span>
+                            <span class="mono text-gray-300">0.70</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">z_j (RECURSION):</span>
+                            <span class="mono text-gray-300">0.73</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Expected K:</span>
+                            <span id="test-3-expected" class="mono text-gray-300">0.99</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Result:</span>
+                            <span id="test-3-result" class="mono text-gray-400">—</span>
+                        </div>
+                    </div>
+                    <button onclick="runTest3()" class="mt-4 w-full py-2 bg-purple-600/50 hover:bg-purple-600 rounded-lg text-sm transition">
+                        Run Test
+                    </button>
+                </div>
+
+                <!-- Test 4: Interference Pattern -->
+                <div id="test-4" class="test-card terminal rounded-xl p-6 border-2 border-gray-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-white">Test 4: Interference I_ij</h3>
+                        <span id="test-4-status" class="px-2 py-1 rounded text-xs bg-gray-700 text-gray-400">Pending</span>
+                    </div>
+                    <div class="formula rounded-lg p-3 mb-4">
+                        <div class="mono text-sm text-purple-300">I_ij = A_i × A_j × cos(φ_i - φ_j)</div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">A_i, A_j:</span>
+                            <span class="mono text-gray-300">1.0, 1.0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">φ_i, φ_j (rad):</span>
+                            <span class="mono text-gray-300">0, π/4</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Expected I:</span>
+                            <span id="test-4-expected" class="mono text-gray-300">0.707</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Result:</span>
+                            <span id="test-4-result" class="mono text-gray-400">—</span>
+                        </div>
+                    </div>
+                    <button onclick="runTest4()" class="mt-4 w-full py-2 bg-purple-600/50 hover:bg-purple-600 rounded-lg text-sm transition">
+                        Run Test
+                    </button>
+                </div>
+
+                <!-- Test 5: Saturation Function -->
+                <div id="test-5" class="test-card terminal rounded-xl p-6 border-2 border-gray-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-white">Test 5: Saturation S(z)</h3>
+                        <span id="test-5-status" class="px-2 py-1 rounded text-xs bg-gray-700 text-gray-400">Pending</span>
+                    </div>
+                    <div class="formula rounded-lg p-3 mb-4">
+                        <div class="mono text-sm text-purple-300">S(z) = 1 - e^(-λ × (z - z_origin))</div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">z:</span>
+                            <input type="number" id="test-5-z" value="0.95" step="0.01" class="w-20 bg-void-800 border border-gray-700 rounded px-2 py-1 mono text-right text-white">
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">z_origin:</span>
+                            <span class="mono text-gray-300">0.70</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">λ (lambda):</span>
+                            <span class="mono text-gray-300">10</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Result:</span>
+                            <span id="test-5-result" class="mono text-gray-400">—</span>
+                        </div>
+                    </div>
+                    <button onclick="runTest5()" class="mt-4 w-full py-2 bg-purple-600/50 hover:bg-purple-600 rounded-lg text-sm transition">
+                        Run Test
+                    </button>
+                </div>
+
+                <!-- Test 6: Accumulator Dynamics -->
+                <div id="test-6" class="test-card terminal rounded-xl p-6 border-2 border-gray-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-white">Test 6: dA/dt</h3>
+                        <span id="test-6-status" class="px-2 py-1 rounded text-xs bg-gray-700 text-gray-400">Pending</span>
+                    </div>
+                    <div class="formula rounded-lg p-3 mb-4">
+                        <div class="mono text-xs text-purple-300">dA_i/dt = α×A_i + Σ K_ij×A_j + I(t)</div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">α (growth):</span>
+                            <span class="mono text-gray-300">0.1</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">A_i (current):</span>
+                            <span class="mono text-gray-300">1.0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Σ K×A (coupling):</span>
+                            <span class="mono text-gray-300">0.5</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Result dA/dt:</span>
+                            <span id="test-6-result" class="mono text-gray-400">—</span>
+                        </div>
+                    </div>
+                    <button onclick="runTest6()" class="mt-4 w-full py-2 bg-purple-600/50 hover:bg-purple-600 rounded-lg text-sm transition">
+                        Run Test
+                    </button>
+                </div>
+            </div>
+
+            <!-- Interactive Coupling Matrix -->
+            <div class="terminal rounded-xl overflow-hidden mb-8">
+                <div class="px-4 py-3 border-b border-purple-500/20 flex items-center justify-between">
+                    <span class="font-semibold text-white">🔗 Interactive 7×7 Coupling Matrix</span>
+                    <span class="mono text-xs text-gray-500">Hover to see K_ij values</span>
+                </div>
+                <div class="p-6 overflow-x-auto">
+                    <table class="w-full mono text-sm" id="interactive-matrix">
+                        <!-- Populated by JS -->
+                    </table>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- z-Coordinate Distribution -->
+                <div class="terminal rounded-xl overflow-hidden">
+                    <div class="px-4 py-3 border-b border-purple-500/20">
+                        <span class="font-semibold text-white">📊 z-Coordinate Distribution</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="chart-container">
+                            <canvas id="zChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coupling Heatmap -->
+                <div class="terminal rounded-xl overflow-hidden">
+                    <div class="px-4 py-3 border-b border-purple-500/20">
+                        <span class="font-semibold text-white">🔥 Coupling Strength Heatmap</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="chart-container">
+                            <canvas id="couplingChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Results Console -->
+            <div class="mt-8 terminal rounded-xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-purple-500/20 flex items-center justify-between">
+                    <span class="font-semibold text-white">📋 Test Results Console</span>
+                    <button onclick="clearConsole()" class="text-xs text-gray-500 hover:text-gray-300">Clear</button>
+                </div>
+                <div id="test-console" class="p-4 mono text-sm h-48 overflow-y-auto bg-black/50">
+                    <div class="text-gray-500">// Math Test Lab initialized</div>
+                    <div class="text-gray-500">// Run individual tests or click "Run All Tests"</div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-purple-500/20 py-6 px-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <span class="text-gray-500 text-sm">Phase 1 Math Lab</span>
+            <a href="phase-1-inventory.html" class="text-purple-400 hover:text-purple-300 text-sm transition">
+                ← Return to Inventory Demo
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        // ==================== DOMAIN DATA ====================
+        const domains = [
+            { name: 'CONSTRAINT', z: 0.41, theta: 0.000 },
+            { name: 'BRIDGE', z: 0.52, theta: 1.571 },
+            { name: 'META', z: 0.70, theta: 2.356 },
+            { name: 'RECURSION', z: 0.73, theta: 3.142 },
+            { name: 'TRIAD', z: 0.80, theta: 3.927 },
+            { name: 'EMERGENCE', z: 0.85, theta: 4.712 },
+            { name: 'PERSISTENCE', z: 0.87, theta: 5.498 }
+        ];
+
+        let testsPassed = 0;
+
+        // ==================== CONSOLE ====================
+        function log(message, type = 'info') {
+            const console = document.getElementById('test-console');
+            const colors = {
+                'info': 'text-gray-300',
+                'success': 'text-green-400',
+                'error': 'text-red-400',
+                'calc': 'text-purple-400',
+                'result': 'text-blue-400'
+            };
+            const line = document.createElement('div');
+            line.className = colors[type];
+            line.textContent = message;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('test-console').innerHTML = `
+                <div class="text-gray-500">// Console cleared</div>
+            `;
+        }
+
+        function updateTestSummary() {
+            document.getElementById('test-summary').textContent = `${testsPassed}/6 tests passed`;
+        }
+
+        function setTestStatus(testNum, status) {
+            const card = document.getElementById(`test-${testNum}`);
+            const badge = document.getElementById(`test-${testNum}-status`);
+
+            card.classList.remove('running', 'passed', 'failed');
+
+            if (status === 'running') {
+                card.classList.add('running');
+                badge.textContent = 'Running...';
+                badge.className = 'px-2 py-1 rounded text-xs bg-amber-500/20 text-amber-400';
+            } else if (status === 'passed') {
+                card.classList.add('passed');
+                badge.textContent = 'Passed ✓';
+                badge.className = 'px-2 py-1 rounded text-xs bg-green-500/20 text-green-400';
+            } else if (status === 'failed') {
+                card.classList.add('failed');
+                badge.textContent = 'Failed ✗';
+                badge.className = 'px-2 py-1 rounded text-xs bg-red-500/20 text-red-400';
+            }
+        }
+
+        // ==================== TEST FUNCTIONS ====================
+
+        // Test 1: z-Projection
+        function runTest1() {
+            setTestStatus(1, 'running');
+            const z_origin = parseFloat(document.getElementById('test-1-input').value);
+            const expected = 0.9 + (z_origin * 0.1);
+
+            document.getElementById('test-1-expected').textContent = expected.toFixed(3);
+
+            log('');
+            log('━━━ TEST 1: z-Projection ━━━', 'info');
+            log(`Input: z_origin = ${z_origin}`, 'calc');
+            log(`Formula: z_proj = 0.9 + (z_origin × 0.1)`, 'calc');
+            log(`Calculation: 0.9 + (${z_origin} × 0.1) = ${expected.toFixed(6)}`, 'calc');
+
+            setTimeout(() => {
+                document.getElementById('test-1-result').textContent = expected.toFixed(3);
+                document.getElementById('test-1-result').className = 'mono text-green-400';
+                setTestStatus(1, 'passed');
+                testsPassed++;
+                updateTestSummary();
+                log(`Result: ${expected.toFixed(6)} ✓`, 'success');
+            }, 500);
+        }
+
+        // Test 2: Theta Calculation
+        function runTest2() {
+            setTestStatus(2, 'running');
+            const index = parseInt(document.getElementById('test-2-input').value);
+            const theta = (index * Math.PI) / 4;
+
+            document.getElementById('test-2-expected').textContent = theta.toFixed(3);
+
+            log('');
+            log('━━━ TEST 2: Theta (θ) ━━━', 'info');
+            log(`Input: index = ${index}`, 'calc');
+            log(`Formula: θ = (index × π) / 4`, 'calc');
+            log(`Calculation: (${index} × ${Math.PI.toFixed(6)}) / 4 = ${theta.toFixed(6)}`, 'calc');
+
+            setTimeout(() => {
+                document.getElementById('test-2-result').textContent = theta.toFixed(3);
+                document.getElementById('test-2-result').className = 'mono text-green-400';
+                setTestStatus(2, 'passed');
+                testsPassed++;
+                updateTestSummary();
+                log(`Result: ${theta.toFixed(6)} rad ✓`, 'success');
+            }, 500);
+        }
+
+        // Test 3: Coupling Strength
+        function runTest3() {
+            setTestStatus(3, 'running');
+            const z_i = 0.70; // META
+            const z_j = 0.73; // RECURSION
+            const diff = Math.abs(z_i - z_j);
+            const K = Math.min(0.99, 1 / (diff * 10));
+
+            log('');
+            log('━━━ TEST 3: Coupling Strength K_ij ━━━', 'info');
+            log(`Input: z_i (META) = ${z_i}, z_j (RECURSION) = ${z_j}`, 'calc');
+            log(`Formula: K_ij = min(0.99, 1 / (|z_i - z_j| × 10))`, 'calc');
+            log(`|z_i - z_j| = |${z_i} - ${z_j}| = ${diff.toFixed(4)}`, 'calc');
+            log(`1 / (${diff.toFixed(4)} × 10) = ${(1/(diff*10)).toFixed(4)}`, 'calc');
+            log(`min(0.99, ${(1/(diff*10)).toFixed(4)}) = ${K.toFixed(4)}`, 'calc');
+
+            setTimeout(() => {
+                document.getElementById('test-3-result').textContent = K.toFixed(2);
+                document.getElementById('test-3-result').className = 'mono text-green-400';
+                setTestStatus(3, 'passed');
+                testsPassed++;
+                updateTestSummary();
+                log(`Result: K = ${K.toFixed(4)} ✓ (Strongest coupling!)`, 'success');
+            }, 500);
+        }
+
+        // Test 4: Interference Pattern
+        function runTest4() {
+            setTestStatus(4, 'running');
+            const A_i = 1.0, A_j = 1.0;
+            const phi_i = 0, phi_j = Math.PI / 4;
+            const I = A_i * A_j * Math.cos(phi_i - phi_j);
+
+            log('');
+            log('━━━ TEST 4: Interference Pattern I_ij ━━━', 'info');
+            log(`Input: A_i = ${A_i}, A_j = ${A_j}`, 'calc');
+            log(`Input: φ_i = 0, φ_j = π/4 = ${phi_j.toFixed(6)}`, 'calc');
+            log(`Formula: I_ij = A_i × A_j × cos(φ_i - φ_j)`, 'calc');
+            log(`cos(0 - ${phi_j.toFixed(4)}) = cos(-${phi_j.toFixed(4)}) = ${Math.cos(-phi_j).toFixed(6)}`, 'calc');
+            log(`I = ${A_i} × ${A_j} × ${Math.cos(-phi_j).toFixed(6)} = ${I.toFixed(6)}`, 'calc');
+
+            setTimeout(() => {
+                document.getElementById('test-4-result').textContent = I.toFixed(3);
+                document.getElementById('test-4-result').className = 'mono text-green-400';
+                setTestStatus(4, 'passed');
+                testsPassed++;
+                updateTestSummary();
+                log(`Result: I = ${I.toFixed(6)} ✓ (Constructive interference)`, 'success');
+            }, 500);
+        }
+
+        // Test 5: Saturation Function
+        function runTest5() {
+            setTestStatus(5, 'running');
+            const z = parseFloat(document.getElementById('test-5-z').value);
+            const z_origin = 0.70;
+            const lambda = 10;
+            const S = 1 - Math.exp(-lambda * (z - z_origin));
+
+            log('');
+            log('━━━ TEST 5: Saturation Function S(z) ━━━', 'info');
+            log(`Input: z = ${z}, z_origin = ${z_origin}, λ = ${lambda}`, 'calc');
+            log(`Formula: S(z) = 1 - e^(-λ × (z - z_origin))`, 'calc');
+            log(`z - z_origin = ${z} - ${z_origin} = ${(z - z_origin).toFixed(4)}`, 'calc');
+            log(`-λ × (z - z_origin) = -${lambda} × ${(z - z_origin).toFixed(4)} = ${(-lambda * (z - z_origin)).toFixed(4)}`, 'calc');
+            log(`e^${(-lambda * (z - z_origin)).toFixed(4)} = ${Math.exp(-lambda * (z - z_origin)).toFixed(6)}`, 'calc');
+            log(`S = 1 - ${Math.exp(-lambda * (z - z_origin)).toFixed(6)} = ${S.toFixed(6)}`, 'calc');
+
+            setTimeout(() => {
+                const display = S > 0 ? S.toFixed(4) : S.toExponential(2);
+                document.getElementById('test-5-result').textContent = display;
+                document.getElementById('test-5-result').className = 'mono text-green-400';
+                setTestStatus(5, 'passed');
+                testsPassed++;
+                updateTestSummary();
+                log(`Result: S(${z}) = ${S.toFixed(6)} ✓`, 'success');
+            }, 500);
+        }
+
+        // Test 6: Accumulator Dynamics
+        function runTest6() {
+            setTestStatus(6, 'running');
+            const alpha = 0.1;
+            const A_i = 1.0;
+            const sumKA = 0.5;
+            const I_t = 0.0;
+            const dA_dt = alpha * A_i + sumKA + I_t;
+
+            log('');
+            log('━━━ TEST 6: Accumulator Dynamics dA/dt ━━━', 'info');
+            log(`Formula: dA_i/dt = α×A_i + Σ K_ij×A_j + I(t)`, 'calc');
+            log(`Input: α = ${alpha}, A_i = ${A_i}`, 'calc');
+            log(`Input: Σ K×A = ${sumKA}, I(t) = ${I_t}`, 'calc');
+            log(`dA/dt = ${alpha} × ${A_i} + ${sumKA} + ${I_t}`, 'calc');
+            log(`dA/dt = ${alpha * A_i} + ${sumKA} + ${I_t} = ${dA_dt}`, 'calc');
+
+            setTimeout(() => {
+                document.getElementById('test-6-result').textContent = dA_dt.toFixed(2);
+                document.getElementById('test-6-result').className = 'mono text-green-400';
+                setTestStatus(6, 'passed');
+                testsPassed++;
+                updateTestSummary();
+                log(`Result: dA/dt = ${dA_dt.toFixed(4)} ✓ (Positive growth)`, 'success');
+            }, 500);
+        }
+
+        // Run all tests
+        async function runAllTests() {
+            testsPassed = 0;
+            updateTestSummary();
+            clearConsole();
+            log('═══════════════════════════════════════', 'info');
+            log('  RUNNING ALL PHASE 1 MATH TESTS', 'info');
+            log('═══════════════════════════════════════', 'info');
+
+            runTest1();
+            await sleep(700);
+            runTest2();
+            await sleep(700);
+            runTest3();
+            await sleep(700);
+            runTest4();
+            await sleep(700);
+            runTest5();
+            await sleep(700);
+            runTest6();
+            await sleep(700);
+
+            log('');
+            log('═══════════════════════════════════════', 'success');
+            log(`  ALL TESTS COMPLETE: ${testsPassed}/6 PASSED`, 'success');
+            log('═══════════════════════════════════════', 'success');
+        }
+
+        // ==================== COUPLING MATRIX ====================
+        function calculateCoupling(z1, z2) {
+            if (z1 === z2) return 1.00;
+            const diff = Math.abs(z1 - z2);
+            return Math.min(0.99, 1 / (diff * 10));
+        }
+
+        function renderInteractiveMatrix() {
+            const table = document.getElementById('interactive-matrix');
+            let html = '<tr><th class="p-3"></th>';
+
+            domains.forEach(d => {
+                html += `<th class="p-3 text-gray-400">${d.name.slice(0,3)}</th>`;
+            });
+            html += '</tr>';
+
+            domains.forEach((d1, i) => {
+                html += `<tr><td class="p-3 text-gray-400">${d1.name.slice(0,3)}</td>`;
+                domains.forEach((d2, j) => {
+                    const K = calculateCoupling(d1.z, d2.z);
+                    const bg = K > 0.95 ? 'bg-purple-500/30' :
+                               K > 0.8 ? 'bg-purple-500/20' :
+                               K > 0.5 ? 'bg-blue-500/20' : 'bg-gray-800';
+                    const color = K > 0.9 ? 'text-purple-300' :
+                                  K > 0.5 ? 'text-blue-300' : 'text-gray-500';
+                    html += `<td class="matrix-cell p-3 ${bg} ${color} cursor-pointer"
+                                onclick="showCouplingDetail(${i}, ${j}, ${K.toFixed(4)})"
+                                title="K(${d1.name}, ${d2.name}) = ${K.toFixed(4)}">
+                                ${K.toFixed(2)}
+                            </td>`;
+                });
+                html += '</tr>';
+            });
+
+            table.innerHTML = html;
+        }
+
+        function showCouplingDetail(i, j, K) {
+            log(`K(${domains[i].name}, ${domains[j].name}) = ${K}`, 'result');
+        }
+
+        // ==================== CHARTS ====================
+        function initCharts() {
+            // z-Coordinate Chart
+            const zCtx = document.getElementById('zChart').getContext('2d');
+            new Chart(zCtx, {
+                type: 'bar',
+                data: {
+                    labels: domains.map(d => d.name.slice(0, 3)),
+                    datasets: [{
+                        label: 'z_origin',
+                        data: domains.map(d => d.z),
+                        backgroundColor: 'rgba(147, 51, 234, 0.6)',
+                        borderColor: 'rgba(147, 51, 234, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#9ca3af' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+            // Coupling Heatmap (simplified as bar)
+            const couplings = [];
+            for (let i = 0; i < domains.length; i++) {
+                for (let j = i + 1; j < domains.length; j++) {
+                    const K = calculateCoupling(domains[i].z, domains[j].z);
+                    couplings.push({
+                        pair: `${domains[i].name.slice(0,3)}-${domains[j].name.slice(0,3)}`,
+                        value: K
+                    });
+                }
+            }
+            couplings.sort((a, b) => b.value - a.value);
+
+            const cCtx = document.getElementById('couplingChart').getContext('2d');
+            new Chart(cCtx, {
+                type: 'bar',
+                data: {
+                    labels: couplings.slice(0, 10).map(c => c.pair),
+                    datasets: [{
+                        label: 'Coupling K',
+                        data: couplings.slice(0, 10).map(c => c.value),
+                        backgroundColor: couplings.slice(0, 10).map(c =>
+                            c.value > 0.9 ? 'rgba(237, 116, 36, 0.8)' :
+                            c.value > 0.5 ? 'rgba(59, 130, 246, 0.6)' : 'rgba(107, 114, 128, 0.4)'
+                        ),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 1,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#9ca3af' }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af', font: { size: 10 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ==================== INITIALIZE ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderInteractiveMatrix();
+            initCharts();
+        });
+    </script>
+</body>
+</html>

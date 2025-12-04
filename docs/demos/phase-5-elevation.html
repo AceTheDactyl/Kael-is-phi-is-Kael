@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 5: Continuous Elevation | Foxfire Cybernetics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        foxfire: {
+                            400: '#f19248',
+                            500: '#ed7424',
+                            600: '#de5a1a',
+                        },
+                        ember: {
+                            500: '#ff6b35',
+                            600: '#f7520e',
+                        },
+                        void: {
+                            900: '#0a0a0f',
+                            800: '#12121a',
+                            700: '#1a1a24',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #1a1a24 100%);
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        .foxfire-glow {
+            box-shadow: 0 0 20px rgba(237, 116, 36, 0.3), 0 0 40px rgba(237, 116, 36, 0.1);
+        }
+        .foxfire-glow-intense {
+            box-shadow: 0 0 30px rgba(237, 116, 36, 0.5), 0 0 60px rgba(237, 116, 36, 0.2), 0 0 100px rgba(237, 116, 36, 0.1);
+        }
+
+        .terminal {
+            background: linear-gradient(180deg, #1a1a24 0%, #12121a 100%);
+            border: 1px solid rgba(237, 116, 36, 0.3);
+        }
+
+        .code-block {
+            background: #0a0a0f;
+            border-left: 3px solid #ed7424;
+        }
+
+        /* Continuous pulse animation */
+        .continuous-pulse {
+            animation: continuous-pulse 4s ease-in-out infinite;
+        }
+        @keyframes continuous-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+
+        /* Elevation ring */
+        .elevation-ring {
+            animation: elevation-spin 20s linear infinite;
+        }
+        @keyframes elevation-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Wave animation */
+        .wave-flow {
+            animation: wave-flow 3s ease-in-out infinite;
+        }
+        @keyframes wave-flow {
+            0%, 100% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+        }
+
+        /* Status indicator */
+        .status-active {
+            animation: status-blink 1.5s ease-in-out infinite;
+        }
+        @keyframes status-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #12121a; }
+        ::-webkit-scrollbar-thumb { background: #ed7424; border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen text-gray-100">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-void-900/90 backdrop-blur-md border-b border-foxfire-500/20">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-400 hover:text-white transition">&larr; Manual</a>
+                    <span class="text-foxfire-500">|</span>
+                    <span class="mono text-foxfire-400">PHASE 5: CONTINUOUS ELEVATION</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="phase-4-verification.html" class="text-gray-400 hover:text-foxfire-400 transition text-sm">&larr; Phase 4</a>
+                    <span class="text-gray-600">|</span>
+                    <a href="phase-0-alignment.html" class="text-gray-400 hover:text-foxfire-400 transition text-sm">Phase 0 &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-24 pb-12 px-4 max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center space-x-2 px-4 py-2 bg-foxfire-500/10 border border-foxfire-500/30 rounded-full mb-6 foxfire-glow">
+                <div class="w-2 h-2 bg-foxfire-500 rounded-full status-active"></div>
+                <span class="mono text-xs text-foxfire-400">CADENCE: CONTINUOUS | z≈0.900 TARGET</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                Phase 5: <span class="bg-gradient-to-r from-foxfire-400 to-ember-500 bg-clip-text text-transparent">Continuous Elevation</span>
+            </h1>
+            <p class="text-gray-400 max-w-2xl mx-auto">
+                Monitor z≈0.900, maintain coordinate accuracy, and repeat weekly ceremonies for perpetual system optimization.
+            </p>
+        </div>
+
+        <!-- Live Monitor Dashboard -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+            <!-- z-Coordinate Monitor -->
+            <div class="terminal rounded-xl overflow-hidden foxfire-glow continuous-pulse">
+                <div class="px-6 py-4 border-b border-foxfire-500/20">
+                    <h3 class="font-bold text-white">z-Coordinate Monitor</h3>
+                </div>
+                <div class="p-6 text-center">
+                    <div class="text-6xl font-bold text-foxfire-400 mono" id="liveZ">0.900</div>
+                    <div class="text-gray-500 text-sm mt-2">Target: z ≈ 0.900</div>
+                    <div class="mt-4 h-2 bg-void-900 rounded-full overflow-hidden">
+                        <div id="zProgress" class="h-full bg-gradient-to-r from-foxfire-600 to-ember-500 transition-all" style="width: 90%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>0.0</span>
+                        <span>1.0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cascade Health -->
+            <div class="terminal rounded-xl overflow-hidden">
+                <div class="px-6 py-4 border-b border-foxfire-500/20">
+                    <h3 class="font-bold text-white">Cascade Health</h3>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="relative">
+                            <svg viewBox="0 0 120 120" class="w-32 h-32">
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="#1a1a24" stroke-width="8"/>
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="url(#cascadeGradient)" stroke-width="8"
+                                    stroke-dasharray="314" stroke-dashoffset="15" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+                                <defs>
+                                    <linearGradient id="cascadeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#ed7424"/>
+                                        <stop offset="100%" stop-color="#22c55e"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="text-center">
+                                    <div id="cascadeValue" class="text-2xl font-bold text-green-400">0.952</div>
+                                    <div class="text-xs text-gray-500">CASCADE</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div>
+                            <div class="text-gray-500">Min</div>
+                            <div id="cascMin" class="text-blue-400">0.850</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-500">Current</div>
+                            <div id="cascCurrent" class="text-green-400">0.952</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-500">Peak</div>
+                            <div id="cascPeak" class="text-amber-400">0.999</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ceremony Timer -->
+            <div class="terminal rounded-xl overflow-hidden">
+                <div class="px-6 py-4 border-b border-purple-500/20">
+                    <h3 class="font-bold text-white">Weekly Ceremony Timer</h3>
+                </div>
+                <div class="p-6 text-center">
+                    <div class="mb-4">
+                        <div id="timerDays" class="text-5xl font-bold text-purple-400">6</div>
+                        <div class="text-gray-500 text-sm">Days Until Next Ceremony</div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-xs">
+                        <div class="bg-void-800/50 rounded p-2">
+                            <div id="timerHours" class="text-xl font-bold text-gray-300">14</div>
+                            <div class="text-gray-500">Hours</div>
+                        </div>
+                        <div class="bg-void-800/50 rounded p-2">
+                            <div id="timerMinutes" class="text-xl font-bold text-gray-300">32</div>
+                            <div class="text-gray-500">Minutes</div>
+                        </div>
+                        <div class="bg-void-800/50 rounded p-2">
+                            <div id="timerSeconds" class="text-xl font-bold text-foxfire-400">45</div>
+                            <div class="text-gray-500">Seconds</div>
+                        </div>
+                    </div>
+                    <button id="triggerCeremony" class="mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded text-sm transition">
+                        Trigger Manual Ceremony
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-time Elevation Chart -->
+        <div class="terminal rounded-xl overflow-hidden mb-12 foxfire-glow">
+            <div class="px-6 py-4 border-b border-foxfire-500/20 flex items-center justify-between">
+                <h3 class="font-bold text-white">Continuous Elevation Monitor</h3>
+                <div class="flex items-center space-x-4">
+                    <span id="monitorStatus" class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full status-active"></div>
+                        <span class="text-xs text-green-400">MONITORING</span>
+                    </span>
+                    <button id="toggleMonitor" class="px-3 py-1 bg-void-700 hover:bg-void-600 rounded text-xs transition">
+                        Pause
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="h-64">
+                    <canvas id="elevationChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Domain Health Grid -->
+        <div class="terminal rounded-xl overflow-hidden mb-12">
+            <div class="px-6 py-4 border-b border-foxfire-500/20">
+                <h3 class="font-bold text-white">7-Domain Health Status</h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4" id="domainGrid">
+                    <!-- Domains will be populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Code Scaffolding -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Continuous Monitor Script -->
+            <div class="terminal rounded-xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-foxfire-500/20 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-foxfire-400">&#128196;</span>
+                        <span class="mono text-sm text-white">continuous_monitor.py</span>
+                    </div>
+                    <span class="text-xs text-gray-500">scaffolding</span>
+                </div>
+                <div class="p-4 overflow-x-auto">
+                    <pre class="mono text-xs"><code class="language-python"><span class="text-gray-500">#!/usr/bin/env python3</span>
+<span class="text-gray-500">"""
+Continuous Elevation Monitor
+Phase 5: Real-time z-coordinate tracking and ceremony scheduling
+"""</span>
+
+<span class="text-purple-400">import</span> asyncio
+<span class="text-purple-400">import</span> json
+<span class="text-purple-400">from</span> datetime <span class="text-purple-400">import</span> datetime, timedelta
+<span class="text-purple-400">from</span> typing <span class="text-purple-400">import</span> Dict, Callable
+
+<span class="text-amber-400">TARGET_Z</span> = <span class="text-amber-400">0.900</span>
+<span class="text-amber-400">TOLERANCE</span> = <span class="text-amber-400">0.005</span>
+<span class="text-amber-400">CEREMONY_INTERVAL</span> = timedelta(days=<span class="text-amber-400">7</span>)
+
+<span class="text-purple-400">class</span> <span class="text-amber-400">ContinuousMonitor</span>:
+    <span class="text-purple-400">def</span> <span class="text-blue-400">__init__</span>(<span class="text-red-400">self</span>):
+        <span class="text-red-400">self</span>.current_z = <span class="text-amber-400">0.90</span>
+        <span class="text-red-400">self</span>.cascade = <span class="text-amber-400">0.95</span>
+        <span class="text-red-400">self</span>.last_ceremony = datetime.utcnow()
+        <span class="text-red-400">self</span>.running = <span class="text-amber-400">False</span>
+        <span class="text-red-400">self</span>.callbacks = []
+
+    <span class="text-purple-400">async def</span> <span class="text-blue-400">start</span>(<span class="text-red-400">self</span>):
+        <span class="text-gray-500">"""Start continuous monitoring loop."""</span>
+        <span class="text-red-400">self</span>.running = <span class="text-amber-400">True</span>
+        <span class="text-amber-400">print</span>(<span class="text-green-400">"[MONITOR] Starting continuous elevation..."</span>)
+
+        <span class="text-purple-400">while</span> <span class="text-red-400">self</span>.running:
+            <span class="text-gray-500"># Read current z from GHMP plates</span>
+            <span class="text-red-400">self</span>._update_z()
+
+            <span class="text-gray-500"># Check if ceremony is due</span>
+            <span class="text-purple-400">if</span> <span class="text-red-400">self</span>._ceremony_due():
+                <span class="text-purple-400">await</span> <span class="text-red-400">self</span>._trigger_ceremony()
+
+            <span class="text-gray-500"># Check z drift</span>
+            <span class="text-purple-400">if</span> <span class="text-amber-400">abs</span>(<span class="text-red-400">self</span>.current_z - TARGET_Z) > TOLERANCE:
+                <span class="text-red-400">self</span>._alert_drift()
+
+            <span class="text-gray-500"># Notify callbacks</span>
+            <span class="text-purple-400">for</span> cb <span class="text-purple-400">in</span> <span class="text-red-400">self</span>.callbacks:
+                cb(<span class="text-red-400">self</span>.get_status())
+
+            <span class="text-purple-400">await</span> asyncio.sleep(<span class="text-amber-400">1.0</span>)
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">stop</span>(<span class="text-red-400">self</span>):
+        <span class="text-gray-500">"""Stop monitoring."""</span>
+        <span class="text-red-400">self</span>.running = <span class="text-amber-400">False</span>
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">_update_z</span>(<span class="text-red-400">self</span>):
+        <span class="text-gray-500">"""Update z from system state."""</span>
+        <span class="text-gray-500"># Simulate small fluctuations</span>
+        <span class="text-purple-400">import</span> random
+        drift = random.uniform(-<span class="text-amber-400">0.002</span>, <span class="text-amber-400">0.002</span>)
+        <span class="text-red-400">self</span>.current_z = <span class="text-amber-400">max</span>(<span class="text-amber-400">0.85</span>, <span class="text-amber-400">min</span>(<span class="text-amber-400">0.95</span>, <span class="text-red-400">self</span>.current_z + drift))
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">_ceremony_due</span>(<span class="text-red-400">self</span>) -> <span class="text-amber-400">bool</span>:
+        <span class="text-gray-500">"""Check if weekly ceremony is due."""</span>
+        <span class="text-purple-400">return</span> datetime.utcnow() - <span class="text-red-400">self</span>.last_ceremony >= CEREMONY_INTERVAL
+
+    <span class="text-purple-400">async def</span> <span class="text-blue-400">_trigger_ceremony</span>(<span class="text-red-400">self</span>):
+        <span class="text-gray-500">"""Execute weekly ceremony sequence."""</span>
+        <span class="text-amber-400">print</span>(<span class="text-green-400">"[CEREMONY] Initiating weekly ritual..."</span>)
+        <span class="text-gray-500"># Phase 0-4 in sequence</span>
+        <span class="text-purple-400">await</span> asyncio.sleep(<span class="text-amber-400">2.0</span>)
+        <span class="text-red-400">self</span>.last_ceremony = datetime.utcnow()
+        <span class="text-red-400">self</span>.current_z = TARGET_Z
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">_alert_drift</span>(<span class="text-red-400">self</span>):
+        <span class="text-gray-500">"""Alert on z-coordinate drift."""</span>
+        <span class="text-amber-400">print</span>(<span class="text-green-400">f"[ALERT] z drift detected: {<span class="text-red-400">self</span>.current_z:.4f}"</span>)
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">get_status</span>(<span class="text-red-400">self</span>) -> Dict:
+        <span class="text-gray-500">"""Get current monitor status."""</span>
+        <span class="text-purple-400">return</span> {
+            <span class="text-green-400">"z"</span>: <span class="text-red-400">self</span>.current_z,
+            <span class="text-green-400">"cascade"</span>: <span class="text-red-400">self</span>.cascade,
+            <span class="text-green-400">"next_ceremony"</span>: (<span class="text-red-400">self</span>.last_ceremony + CEREMONY_INTERVAL).isoformat()
+        }
+
+<span class="text-purple-400">if</span> __name__ == <span class="text-green-400">"__main__"</span>:
+    monitor = ContinuousMonitor()
+    asyncio.run(monitor.start())</code></pre>
+                </div>
+            </div>
+
+            <!-- Weekly Scheduler Script -->
+            <div class="terminal rounded-xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-purple-500/20 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-purple-400">&#128196;</span>
+                        <span class="mono text-sm text-white">weekly_scheduler.py</span>
+                    </div>
+                    <span class="text-xs text-gray-500">scaffolding</span>
+                </div>
+                <div class="p-4 overflow-x-auto">
+                    <pre class="mono text-xs"><code class="language-python"><span class="text-gray-500">#!/usr/bin/env python3</span>
+<span class="text-gray-500">"""
+Weekly Ceremony Scheduler
+Phase 5: Automated ritual scheduling and execution
+"""</span>
+
+<span class="text-purple-400">import</span> schedule
+<span class="text-purple-400">import</span> subprocess
+<span class="text-purple-400">import</span> json
+<span class="text-purple-400">from</span> datetime <span class="text-purple-400">import</span> datetime
+<span class="text-purple-400">from</span> pathlib <span class="text-purple-400">import</span> Path
+
+<span class="text-amber-400">PHASES</span> = [
+    (<span class="text-green-400">"phase_0_alignment.py"</span>, <span class="text-green-400">"Alignment"</span>),
+    (<span class="text-green-400">"phase_1_inventory.py"</span>, <span class="text-green-400">"Inventory"</span>),
+    (<span class="text-green-400">"phase_2_automation.py"</span>, <span class="text-green-400">"Automation"</span>),
+    (<span class="text-green-400">"phase_3_rituals.py"</span>, <span class="text-green-400">"Rituals"</span>),
+    (<span class="text-green-400">"phase_4_verification.py"</span>, <span class="text-green-400">"Verification"</span>)
+]
+
+<span class="text-purple-400">class</span> <span class="text-amber-400">WeeklyScheduler</span>:
+    <span class="text-purple-400">def</span> <span class="text-blue-400">__init__</span>(<span class="text-red-400">self</span>):
+        <span class="text-red-400">self</span>.ceremony_log = []
+        <span class="text-red-400">self</span>.scripts_dir = Path(<span class="text-green-400">"scripts/ceremonies/"</span>)
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">execute_ceremony</span>(<span class="text-red-400">self</span>):
+        <span class="text-gray-500">"""Execute full ceremony sequence."""</span>
+        <span class="text-amber-400">print</span>(<span class="text-green-400">"═"</span> * <span class="text-amber-400">50</span>)
+        <span class="text-amber-400">print</span>(<span class="text-green-400">"WEEKLY CEREMONY INITIATED"</span>)
+        <span class="text-amber-400">print</span>(<span class="text-green-400">f"Timestamp: {datetime.utcnow().isoformat()}"</span>)
+        <span class="text-amber-400">print</span>(<span class="text-green-400">"═"</span> * <span class="text-amber-400">50</span>)
+
+        results = []
+        <span class="text-purple-400">for</span> script, name <span class="text-purple-400">in</span> PHASES:
+            <span class="text-amber-400">print</span>(<span class="text-green-400">f"\n[{name.upper()}] Executing..."</span>)
+            result = <span class="text-red-400">self</span>._run_phase(script)
+            results.append({
+                <span class="text-green-400">"phase"</span>: name,
+                <span class="text-green-400">"success"</span>: result[<span class="text-green-400">"success"</span>],
+                <span class="text-green-400">"timestamp"</span>: datetime.utcnow().isoformat()
+            })
+
+        <span class="text-red-400">self</span>._log_ceremony(results)
+        <span class="text-purple-400">return</span> results
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">_run_phase</span>(<span class="text-red-400">self</span>, script: <span class="text-amber-400">str</span>) -> Dict:
+        <span class="text-gray-500">"""Run a single phase script."""</span>
+        script_path = <span class="text-red-400">self</span>.scripts_dir / script
+
+        <span class="text-purple-400">try</span>:
+            result = subprocess.run(
+                [<span class="text-green-400">"python"</span>, <span class="text-amber-400">str</span>(script_path)],
+                capture_output=<span class="text-amber-400">True</span>,
+                text=<span class="text-amber-400">True</span>,
+                timeout=<span class="text-amber-400">300</span>
+            )
+            success = result.returncode == <span class="text-amber-400">0</span>
+            <span class="text-amber-400">print</span>(<span class="text-green-400">f"  Status: {'OK' if success else 'FAILED'}"</span>)
+            <span class="text-purple-400">return</span> {<span class="text-green-400">"success"</span>: success, <span class="text-green-400">"output"</span>: result.stdout}
+
+        <span class="text-purple-400">except</span> subprocess.TimeoutExpired:
+            <span class="text-amber-400">print</span>(<span class="text-green-400">"  Status: TIMEOUT"</span>)
+            <span class="text-purple-400">return</span> {<span class="text-green-400">"success"</span>: <span class="text-amber-400">False</span>, <span class="text-green-400">"error"</span>: <span class="text-green-400">"timeout"</span>}
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">_log_ceremony</span>(<span class="text-red-400">self</span>, results: List):
+        <span class="text-gray-500">"""Log ceremony results."""</span>
+        log_entry = {
+            <span class="text-green-400">"timestamp"</span>: datetime.utcnow().isoformat(),
+            <span class="text-green-400">"phases"</span>: results,
+            <span class="text-green-400">"success"</span>: <span class="text-amber-400">all</span>(r[<span class="text-green-400">"success"</span>] <span class="text-purple-400">for</span> r <span class="text-purple-400">in</span> results)
+        }
+        <span class="text-red-400">self</span>.ceremony_log.append(log_entry)
+
+        <span class="text-gray-500"># Write to file</span>
+        log_file = Path(<span class="text-green-400">"logs/ceremony_history.json"</span>)
+        log_file.parent.mkdir(exist_ok=<span class="text-amber-400">True</span>)
+
+        <span class="text-purple-400">with</span> <span class="text-amber-400">open</span>(log_file, <span class="text-green-400">"w"</span>) <span class="text-purple-400">as</span> f:
+            json.dump(<span class="text-red-400">self</span>.ceremony_log, f, indent=<span class="text-amber-400">2</span>)
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">schedule_weekly</span>(<span class="text-red-400">self</span>, day: <span class="text-amber-400">str</span> = <span class="text-green-400">"sunday"</span>, time: <span class="text-amber-400">str</span> = <span class="text-green-400">"00:00"</span>):
+        <span class="text-gray-500">"""Schedule weekly ceremony."""</span>
+        <span class="text-amber-400">getattr</span>(schedule.every(), day).at(time).do(
+            <span class="text-red-400">self</span>.execute_ceremony
+        )
+        <span class="text-amber-400">print</span>(<span class="text-green-400">f"Scheduled weekly ceremony: {day} at {time}"</span>)
+
+<span class="text-purple-400">if</span> __name__ == <span class="text-green-400">"__main__"</span>:
+    scheduler = WeeklyScheduler()
+    scheduler.schedule_weekly(<span class="text-green-400">"sunday"</span>, <span class="text-green-400">"02:00"</span>)
+
+    <span class="text-purple-400">while</span> <span class="text-amber-400">True</span>:
+        schedule.run_pending()</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complete Phase Navigation -->
+        <div class="terminal rounded-xl overflow-hidden mb-12 foxfire-glow-intense">
+            <div class="px-6 py-4 border-b border-foxfire-500/20">
+                <h3 class="font-bold text-white">Complete Phase Cycle</h3>
+            </div>
+            <div class="p-6">
+                <div class="flex flex-wrap justify-center items-center gap-4">
+                    <a href="phase-0-alignment.html" class="px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-400 hover:bg-blue-500/30 transition text-sm">
+                        Phase 0: Alignment
+                    </a>
+                    <span class="text-gray-600">→</span>
+                    <a href="phase-1-inventory.html" class="px-4 py-2 bg-cyan-500/20 border border-cyan-500/30 rounded-lg text-cyan-400 hover:bg-cyan-500/30 transition text-sm">
+                        Phase 1: Inventory
+                    </a>
+                    <span class="text-gray-600">→</span>
+                    <a href="phase-2-automation.html" class="px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-lg text-amber-400 hover:bg-amber-500/30 transition text-sm">
+                        Phase 2: Automation
+                    </a>
+                    <span class="text-gray-600">→</span>
+                    <a href="phase-3-rituals.html" class="px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-400 hover:bg-purple-500/30 transition text-sm">
+                        Phase 3: Rituals
+                    </a>
+                    <span class="text-gray-600">→</span>
+                    <a href="phase-4-verification.html" class="px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg text-green-400 hover:bg-green-500/30 transition text-sm">
+                        Phase 4: Verification
+                    </a>
+                    <span class="text-gray-600">→</span>
+                    <div class="px-4 py-2 bg-foxfire-500/20 border border-foxfire-500/50 rounded-lg text-foxfire-400 text-sm foxfire-glow">
+                        Phase 5: Elevation ∞
+                    </div>
+                </div>
+                <div class="text-center mt-6 text-gray-500 text-sm">
+                    Continuous cycle repeats weekly. Each iteration strengthens network coherence.
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase Summary -->
+        <div class="terminal rounded-xl p-6 foxfire-glow">
+            <h3 class="font-bold text-white text-lg mb-4">Phase 5 Summary</h3>
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 text-center">
+                <div>
+                    <div id="currentZ" class="text-2xl font-bold text-foxfire-400">0.900</div>
+                    <div class="text-gray-500 text-sm">Current z</div>
+                </div>
+                <div>
+                    <div id="targetDelta" class="text-2xl font-bold text-green-400">±0.000</div>
+                    <div class="text-gray-500 text-sm">Target Delta</div>
+                </div>
+                <div>
+                    <div id="ceremonyCount" class="text-2xl font-bold text-purple-400">0</div>
+                    <div class="text-gray-500 text-sm">Ceremonies Run</div>
+                </div>
+                <div>
+                    <div id="uptimeHours" class="text-2xl font-bold text-blue-400">0</div>
+                    <div class="text-gray-500 text-sm">Uptime (hrs)</div>
+                </div>
+                <div>
+                    <div id="systemStatus" class="text-2xl font-bold text-green-400">ACTIVE</div>
+                    <div class="text-gray-500 text-sm">Status</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Chart
+        const ctx = document.getElementById('elevationChart').getContext('2d');
+        const chartData = {
+            labels: [],
+            datasets: [{
+                label: 'z-Coordinate',
+                data: [],
+                borderColor: '#ed7424',
+                backgroundColor: 'rgba(237, 116, 36, 0.1)',
+                fill: true,
+                tension: 0.4
+            }, {
+                label: 'Target (0.900)',
+                data: [],
+                borderColor: '#22c55e',
+                borderDash: [5, 5],
+                pointRadius: 0,
+                fill: false
+            }]
+        };
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#9ca3af' }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#6b7280' }
+                    },
+                    y: {
+                        min: 0.85,
+                        max: 0.95,
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#6b7280' }
+                    }
+                }
+            }
+        });
+
+        // Initialize domain grid
+        const domains = ['CONSTRAINT', 'BRIDGE', 'META', 'RECURSION', 'TRIAD', 'EMERGENCE', 'PERSISTENCE'];
+        const domainGrid = document.getElementById('domainGrid');
+        domains.forEach((domain, i) => {
+            const z = (0.941 + (i * 0.007)).toFixed(3);
+            domainGrid.innerHTML += `
+                <div class="bg-void-800/50 rounded-lg p-3 text-center wave-flow" style="animation-delay: ${i * 0.2}s">
+                    <div class="text-xs text-foxfire-400 mono">${domain}</div>
+                    <div class="text-lg font-bold text-white mt-1" id="domain-${i}">${z}</div>
+                    <div class="mt-2 h-1 bg-void-900 rounded-full overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-foxfire-600 to-green-500" style="width: ${(parseFloat(z) * 100)}%"></div>
+                    </div>
+                </div>
+            `;
+        });
+
+        // State
+        let monitoring = true;
+        let currentZ = 0.900;
+        let ceremonyCount = 0;
+        let uptimeStart = Date.now();
+        let timerSeconds = 45;
+
+        // Update loop
+        setInterval(() => {
+            if (!monitoring) return;
+
+            // Simulate z fluctuation
+            const drift = (Math.random() - 0.5) * 0.004;
+            currentZ = Math.max(0.88, Math.min(0.92, currentZ + drift));
+
+            // Update displays
+            document.getElementById('liveZ').textContent = currentZ.toFixed(3);
+            document.getElementById('currentZ').textContent = currentZ.toFixed(3);
+            document.getElementById('zProgress').style.width = (currentZ * 100) + '%';
+
+            // Update delta
+            const delta = currentZ - 0.900;
+            document.getElementById('targetDelta').textContent = (delta >= 0 ? '+' : '') + delta.toFixed(3);
+            document.getElementById('targetDelta').className = 'text-2xl font-bold ' +
+                (Math.abs(delta) < 0.005 ? 'text-green-400' : 'text-amber-400');
+
+            // Update chart
+            const now = new Date().toLocaleTimeString();
+            chartData.labels.push(now);
+            chartData.datasets[0].data.push(currentZ);
+            chartData.datasets[1].data.push(0.900);
+
+            if (chartData.labels.length > 30) {
+                chartData.labels.shift();
+                chartData.datasets[0].data.shift();
+                chartData.datasets[1].data.shift();
+            }
+            chart.update('none');
+
+            // Update uptime
+            const uptimeHrs = ((Date.now() - uptimeStart) / 3600000).toFixed(1);
+            document.getElementById('uptimeHours').textContent = uptimeHrs;
+
+            // Update timer
+            timerSeconds--;
+            if (timerSeconds < 0) timerSeconds = 59;
+            document.getElementById('timerSeconds').textContent = timerSeconds.toString().padStart(2, '0');
+
+            // Update cascade
+            const cascade = 0.95 + (Math.random() * 0.04);
+            document.getElementById('cascadeValue').textContent = cascade.toFixed(3);
+            document.getElementById('cascCurrent').textContent = cascade.toFixed(3);
+        }, 1000);
+
+        // Toggle monitor
+        document.getElementById('toggleMonitor').addEventListener('click', function() {
+            monitoring = !monitoring;
+            this.textContent = monitoring ? 'Pause' : 'Resume';
+            document.getElementById('monitorStatus').innerHTML = monitoring ?
+                '<div class="w-2 h-2 bg-green-500 rounded-full status-active"></div><span class="text-xs text-green-400">MONITORING</span>' :
+                '<div class="w-2 h-2 bg-amber-500 rounded-full"></div><span class="text-xs text-amber-400">PAUSED</span>';
+        });
+
+        // Trigger ceremony
+        document.getElementById('triggerCeremony').addEventListener('click', function() {
+            this.disabled = true;
+            this.textContent = 'Running...';
+
+            setTimeout(() => {
+                ceremonyCount++;
+                document.getElementById('ceremonyCount').textContent = ceremonyCount;
+                document.getElementById('timerDays').textContent = '7';
+                currentZ = 0.900;
+
+                this.disabled = false;
+                this.textContent = 'Trigger Manual Ceremony';
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

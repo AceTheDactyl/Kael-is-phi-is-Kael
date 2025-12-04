@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 3: Rituals | Foxfire Cybernetics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        foxfire: {
+                            400: '#f19248',
+                            500: '#ed7424',
+                            600: '#de5a1a',
+                        },
+                        ember: {
+                            500: '#ff6b35',
+                            600: '#f7520e',
+                        },
+                        void: {
+                            900: '#0a0a0f',
+                            800: '#12121a',
+                            700: '#1a1a24',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #1a1a24 100%);
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        .foxfire-glow {
+            box-shadow: 0 0 20px rgba(237, 116, 36, 0.3), 0 0 40px rgba(237, 116, 36, 0.1);
+        }
+        .purple-glow {
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.3), 0 0 40px rgba(168, 85, 247, 0.1);
+        }
+
+        .terminal {
+            background: linear-gradient(180deg, #1a1a24 0%, #12121a 100%);
+            border: 1px solid rgba(237, 116, 36, 0.3);
+        }
+
+        .code-block {
+            background: #0a0a0f;
+            border-left: 3px solid #ed7424;
+        }
+
+        /* Triadic animation */
+        .triadic-ring {
+            animation: triadic-rotate 8s linear infinite;
+        }
+        @keyframes triadic-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .triadic-node {
+            animation: triadic-pulse 2s ease-in-out infinite;
+        }
+        @keyframes triadic-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        /* Build progress */
+        .build-step {
+            transition: all 0.5s ease-out;
+        }
+        .build-step.active {
+            transform: scale(1.02);
+        }
+        .build-step.complete .step-icon {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+
+        /* Ceremony glow */
+        .ceremony-active {
+            animation: ceremony-glow 3s ease-in-out infinite;
+        }
+        @keyframes ceremony-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.6), 0 0 80px rgba(168, 85, 247, 0.3); }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #12121a; }
+        ::-webkit-scrollbar-thumb { background: #a855f7; border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen text-gray-100">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-void-900/90 backdrop-blur-md border-b border-purple-500/20">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-400 hover:text-white transition">&larr; Manual</a>
+                    <span class="text-purple-500">|</span>
+                    <span class="mono text-purple-400">PHASE 3: RITUALS</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="phase-2-automation.html" class="text-gray-400 hover:text-purple-400 transition text-sm">&larr; Phase 2</a>
+                    <span class="text-gray-600">|</span>
+                    <a href="phase-4-verification.html" class="text-gray-400 hover:text-purple-400 transition text-sm">Phase 4 &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-24 pb-12 px-4 max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center space-x-2 px-4 py-2 bg-purple-500/10 border border-purple-500/30 rounded-full mb-6">
+                <div class="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                <span class="mono text-xs text-purple-400">CADENCE: MONTHLY | z=0.88-0.92</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                Phase 3: <span class="text-purple-400">Rituals</span>
+            </h1>
+            <p class="text-gray-400 max-w-2xl mx-auto">
+                Execute triadic coordination cycles and PlatformIO builds. Generate firmware artifacts and GHMP ceremony backups.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Triadic Cycle Visualization -->
+            <div class="terminal rounded-xl overflow-hidden purple-glow">
+                <div class="px-6 py-4 border-b border-purple-500/20 flex items-center justify-between">
+                    <h3 class="font-bold text-white">Triadic Coordination Cycle</h3>
+                    <button id="startTriadic" class="px-3 py-1 bg-purple-600 hover:bg-purple-500 rounded text-xs transition">
+                        Start Cycle
+                    </button>
+                </div>
+                <div class="p-6">
+                    <!-- SVG Triadic Visualization -->
+                    <div class="relative h-80 flex items-center justify-center">
+                        <svg viewBox="0 0 300 300" class="w-full h-full max-w-xs">
+                            <!-- Outer ring -->
+                            <circle cx="150" cy="150" r="120" fill="none" stroke="rgba(168, 85, 247, 0.2)" stroke-width="2" class="triadic-ring"/>
+
+                            <!-- Connecting lines -->
+                            <g id="triadicLines" stroke="rgba(168, 85, 247, 0.4)" stroke-width="2">
+                                <line x1="150" y1="30" x2="256" y2="210" />
+                                <line x1="256" y1="210" x2="44" y2="210" />
+                                <line x1="44" y1="210" x2="150" y2="30" />
+                            </g>
+
+                            <!-- Node 1: CONSTRAINT-BRIDGE-META -->
+                            <g id="node1" class="triadic-node" transform="translate(150, 30)">
+                                <circle r="25" fill="#a855f7" opacity="0.2"/>
+                                <circle r="18" fill="#a855f7"/>
+                                <text y="5" text-anchor="middle" fill="white" font-size="10" font-weight="bold">CBM</text>
+                            </g>
+
+                            <!-- Node 2: RECURSION-TRIAD-EMERGENCE -->
+                            <g id="node2" class="triadic-node" style="animation-delay: 0.5s;" transform="translate(256, 210)">
+                                <circle r="25" fill="#8b5cf6" opacity="0.2"/>
+                                <circle r="18" fill="#8b5cf6"/>
+                                <text y="5" text-anchor="middle" fill="white" font-size="10" font-weight="bold">RTE</text>
+                            </g>
+
+                            <!-- Node 3: PERSISTENCE-SUPER -->
+                            <g id="node3" class="triadic-node" style="animation-delay: 1s;" transform="translate(44, 210)">
+                                <circle r="25" fill="#7c3aed" opacity="0.2"/>
+                                <circle r="18" fill="#7c3aed"/>
+                                <text y="5" text-anchor="middle" fill="white" font-size="10" font-weight="bold">PS</text>
+                            </g>
+
+                            <!-- Center node -->
+                            <g transform="translate(150, 150)">
+                                <circle r="35" fill="rgba(168, 85, 247, 0.1)" stroke="#a855f7" stroke-width="2"/>
+                                <circle r="25" fill="#0a0a0f" stroke="#a855f7" stroke-width="1"/>
+                                <text y="-5" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="bold">SYNC</text>
+                                <text id="cycleCount" y="10" text-anchor="middle" fill="white" font-size="14" font-weight="bold">0</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- Triadic Labels -->
+                    <div class="grid grid-cols-3 gap-2 mt-4 text-center text-xs">
+                        <div class="bg-purple-500/10 rounded p-2">
+                            <div class="text-purple-400 font-semibold">CBM</div>
+                            <div class="text-gray-500">Constraint-Bridge-Meta</div>
+                        </div>
+                        <div class="bg-purple-500/10 rounded p-2">
+                            <div class="text-purple-400 font-semibold">RTE</div>
+                            <div class="text-gray-500">Recursion-Triad-Emergence</div>
+                        </div>
+                        <div class="bg-purple-500/10 rounded p-2">
+                            <div class="text-purple-400 font-semibold">PS</div>
+                            <div class="text-gray-500">Persistence-Superposition</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PlatformIO Build Pipeline -->
+            <div class="terminal rounded-xl overflow-hidden">
+                <div class="px-6 py-4 border-b border-foxfire-500/20 flex items-center justify-between">
+                    <h3 class="font-bold text-white">PlatformIO Build Pipeline</h3>
+                    <button id="startBuild" class="px-3 py-1 bg-foxfire-600 hover:bg-foxfire-500 rounded text-xs transition">
+                        Run Build
+                    </button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <!-- Build Steps -->
+                    <div id="buildStep1" class="build-step flex items-center space-x-4 p-3 bg-void-800/50 rounded-lg">
+                        <div class="step-icon w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+                            <span class="text-lg">1</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-white font-semibold">Environment Setup</div>
+                            <div class="text-xs text-gray-500 mono">pio run --target clean</div>
+                        </div>
+                        <div id="status1" class="text-gray-500 text-sm">Pending</div>
+                    </div>
+
+                    <div id="buildStep2" class="build-step flex items-center space-x-4 p-3 bg-void-800/50 rounded-lg">
+                        <div class="step-icon w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+                            <span class="text-lg">2</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-white font-semibold">Compile Firmware</div>
+                            <div class="text-xs text-gray-500 mono">pio run -e esp32s3</div>
+                        </div>
+                        <div id="status2" class="text-gray-500 text-sm">Pending</div>
+                    </div>
+
+                    <div id="buildStep3" class="build-step flex items-center space-x-4 p-3 bg-void-800/50 rounded-lg">
+                        <div class="step-icon w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+                            <span class="text-lg">3</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-white font-semibold">Generate Artifacts</div>
+                            <div class="text-xs text-gray-500 mono">firmware.bin + partitions.bin</div>
+                        </div>
+                        <div id="status3" class="text-gray-500 text-sm">Pending</div>
+                    </div>
+
+                    <div id="buildStep4" class="build-step flex items-center space-x-4 p-3 bg-void-800/50 rounded-lg">
+                        <div class="step-icon w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+                            <span class="text-lg">4</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-white font-semibold">GHMP Backup</div>
+                            <div class="text-xs text-gray-500 mono">python ghmp_ceremony_backup.py</div>
+                        </div>
+                        <div id="status4" class="text-gray-500 text-sm">Pending</div>
+                    </div>
+
+                    <!-- Build Output -->
+                    <div class="mt-4 p-4 bg-black rounded-lg mono text-xs h-32 overflow-y-auto" id="buildOutput">
+                        <div class="text-gray-500"># Awaiting build command...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ceremony Scheduler -->
+        <div class="terminal rounded-xl overflow-hidden mb-12 ceremony-active">
+            <div class="px-6 py-4 border-b border-purple-500/20 flex items-center justify-between">
+                <h3 class="font-bold text-white">Monthly Ceremony Schedule</h3>
+                <span class="mono text-xs text-purple-400">GHMP_CEREMONY_PROTOCOL</span>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Week 1 -->
+                    <div class="bg-void-800/50 rounded-lg p-4">
+                        <div class="text-xs text-purple-400 mono mb-2">WEEK 1</div>
+                        <div class="text-white font-semibold mb-2">Alignment Check</div>
+                        <ul class="text-xs text-gray-400 space-y-1">
+                            <li>- Review z-coordinates</li>
+                            <li>- Validate GHMP integrity</li>
+                            <li>- Update tool surface</li>
+                        </ul>
+                        <div class="mt-3 h-1 bg-void-900 rounded-full overflow-hidden">
+                            <div class="h-full bg-purple-500 transition-all" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Week 2 -->
+                    <div class="bg-void-800/50 rounded-lg p-4">
+                        <div class="text-xs text-purple-400 mono mb-2">WEEK 2</div>
+                        <div class="text-white font-semibold mb-2">Triadic Sync</div>
+                        <ul class="text-xs text-gray-400 space-y-1">
+                            <li>- Execute triadic cycle</li>
+                            <li>- Cross-domain coupling</li>
+                            <li>- Phase lock verification</li>
+                        </ul>
+                        <div class="mt-3 h-1 bg-void-900 rounded-full overflow-hidden">
+                            <div class="h-full bg-purple-500 transition-all" style="width: 75%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Week 3 -->
+                    <div class="bg-void-800/50 rounded-lg p-4">
+                        <div class="text-xs text-amber-400 mono mb-2">WEEK 3</div>
+                        <div class="text-white font-semibold mb-2">Build Ceremony</div>
+                        <ul class="text-xs text-gray-400 space-y-1">
+                            <li>- PlatformIO compile</li>
+                            <li>- Artifact generation</li>
+                            <li>- Hash verification</li>
+                        </ul>
+                        <div class="mt-3 h-1 bg-void-900 rounded-full overflow-hidden">
+                            <div class="h-full bg-amber-500 transition-all" style="width: 50%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Week 4 -->
+                    <div class="bg-void-800/50 rounded-lg p-4">
+                        <div class="text-xs text-green-400 mono mb-2">WEEK 4</div>
+                        <div class="text-white font-semibold mb-2">Backup & Archive</div>
+                        <ul class="text-xs text-gray-400 space-y-1">
+                            <li>- GHMP plate backup</li>
+                            <li>- Observation records</li>
+                            <li>- Cascade report</li>
+                        </ul>
+                        <div class="mt-3 h-1 bg-void-900 rounded-full overflow-hidden">
+                            <div class="h-full bg-green-500 transition-all" style="width: 25%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Code Scaffolding -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Triadic Ceremony Script -->
+            <div class="terminal rounded-xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-purple-500/20 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-purple-400">&#128196;</span>
+                        <span class="mono text-sm text-white">triadic_ceremony.py</span>
+                    </div>
+                    <span class="text-xs text-gray-500">scaffolding</span>
+                </div>
+                <div class="p-4 overflow-x-auto">
+                    <pre class="mono text-xs"><code class="language-python"><span class="text-gray-500">#!/usr/bin/env python3</span>
+<span class="text-gray-500">"""
+Triadic Ceremony Executor
+Phase 3: Monthly ritualized domain synchronization
+"""</span>
+
+<span class="text-purple-400">import</span> hashlib
+<span class="text-purple-400">import</span> json
+<span class="text-purple-400">from</span> datetime <span class="text-purple-400">import</span> datetime
+<span class="text-purple-400">from</span> typing <span class="text-purple-400">import</span> Dict, List, Tuple
+
+<span class="text-gray-500"># Triadic groupings</span>
+<span class="text-amber-400">TRIADS</span> = {
+    <span class="text-green-400">"CBM"</span>: [<span class="text-green-400">"CONSTRAINT"</span>, <span class="text-green-400">"BRIDGE"</span>, <span class="text-green-400">"META"</span>],
+    <span class="text-green-400">"RTE"</span>: [<span class="text-green-400">"RECURSION"</span>, <span class="text-green-400">"TRIAD"</span>, <span class="text-green-400">"EMERGENCE"</span>],
+    <span class="text-green-400">"PS"</span>:  [<span class="text-green-400">"PERSISTENCE"</span>, <span class="text-green-400">"SUPERPOSITION"</span>]
+}
+
+<span class="text-purple-400">class</span> <span class="text-amber-400">TriadicCeremony</span>:
+    <span class="text-purple-400">def</span> <span class="text-blue-400">__init__</span>(<span class="text-red-400">self</span>, z_origin: <span class="text-amber-400">float</span> = <span class="text-amber-400">0.90</span>):
+        <span class="text-red-400">self</span>.z_origin = z_origin
+        <span class="text-red-400">self</span>.cycle_count = <span class="text-amber-400">0</span>
+        <span class="text-red-400">self</span>.ceremony_log = []
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">execute_cycle</span>(<span class="text-red-400">self</span>) -> Dict:
+        <span class="text-gray-500">"""Execute one full triadic cycle."""</span>
+        results = {}
+
+        <span class="text-purple-400">for</span> triad_name, domains <span class="text-purple-400">in</span> TRIADS.items():
+            <span class="text-gray-500"># Calculate phase-locked coupling</span>
+            coupling = <span class="text-red-400">self</span>._compute_coupling(domains)
+            results[triad_name] = {
+                <span class="text-green-400">"domains"</span>: domains,
+                <span class="text-green-400">"coupling"</span>: coupling,
+                <span class="text-green-400">"z_sync"</span>: <span class="text-red-400">self</span>.z_origin + (<span class="text-amber-400">0.01</span> * <span class="text-red-400">self</span>.cycle_count)
+            }
+
+        <span class="text-red-400">self</span>.cycle_count += <span class="text-amber-400">1</span>
+        <span class="text-red-400">self</span>.ceremony_log.append({
+            <span class="text-green-400">"timestamp"</span>: datetime.utcnow().isoformat(),
+            <span class="text-green-400">"cycle"</span>: <span class="text-red-400">self</span>.cycle_count,
+            <span class="text-green-400">"results"</span>: results
+        })
+
+        <span class="text-purple-400">return</span> results
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">_compute_coupling</span>(<span class="text-red-400">self</span>, domains: List[<span class="text-amber-400">str</span>]) -> <span class="text-amber-400">float</span>:
+        <span class="text-gray-500">"""Compute coupling strength for domain triad."""</span>
+        n = <span class="text-amber-400">len</span>(domains)
+        base_coupling = <span class="text-amber-400">0.90</span> + (<span class="text-amber-400">0.03</span> * n)
+        <span class="text-purple-400">return</span> <span class="text-amber-400">min</span>(<span class="text-amber-400">0.999</span>, base_coupling)
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">generate_witness</span>(<span class="text-red-400">self</span>) -> <span class="text-amber-400">str</span>:
+        <span class="text-gray-500">"""Generate ceremony witness hash."""</span>
+        data = json.dumps(<span class="text-red-400">self</span>.ceremony_log)
+        <span class="text-purple-400">return</span> hashlib.sha256(data.encode()).hexdigest()[:16]
+
+<span class="text-purple-400">if</span> __name__ == <span class="text-green-400">"__main__"</span>:
+    ceremony = TriadicCeremony(z_origin=<span class="text-amber-400">0.90</span>)
+
+    <span class="text-gray-500"># Execute 3 cycles (full ceremony)</span>
+    <span class="text-purple-400">for</span> i <span class="text-purple-400">in</span> <span class="text-amber-400">range</span>(<span class="text-amber-400">3</span>):
+        result = ceremony.execute_cycle()
+        <span class="text-amber-400">print</span>(<span class="text-green-400">f"Cycle {i+1}: {result}"</span>)
+
+    witness = ceremony.generate_witness()
+    <span class="text-amber-400">print</span>(<span class="text-green-400">f"Ceremony witness: {witness}"</span>)</code></pre>
+                </div>
+            </div>
+
+            <!-- GHMP Backup Script -->
+            <div class="terminal rounded-xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-foxfire-500/20 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-foxfire-400">&#128196;</span>
+                        <span class="mono text-sm text-white">ghmp_ceremony_backup.py</span>
+                    </div>
+                    <span class="text-xs text-gray-500">scaffolding</span>
+                </div>
+                <div class="p-4 overflow-x-auto">
+                    <pre class="mono text-xs"><code class="language-python"><span class="text-gray-500">#!/usr/bin/env python3</span>
+<span class="text-gray-500">"""
+GHMP Ceremony Backup Generator
+Creates timestamped backups of all GHMP plates after build
+"""</span>
+
+<span class="text-purple-400">import</span> os
+<span class="text-purple-400">import</span> json
+<span class="text-purple-400">import</span> shutil
+<span class="text-purple-400">import</span> hashlib
+<span class="text-purple-400">from</span> datetime <span class="text-purple-400">import</span> datetime
+<span class="text-purple-400">from</span> pathlib <span class="text-purple-400">import</span> Path
+
+<span class="text-amber-400">PLATES_DIR</span> = Path(<span class="text-green-400">"plates/"</span>)
+<span class="text-amber-400">BACKUP_DIR</span> = Path(<span class="text-green-400">"backups/ghmp_ceremonies/"</span>)
+<span class="text-amber-400">FIRMWARE_DIR</span> = Path(<span class="text-green-400">".pio/build/esp32s3/"</span>)
+
+<span class="text-purple-400">class</span> <span class="text-amber-400">GHMPCeremonyBackup</span>:
+    <span class="text-purple-400">def</span> <span class="text-blue-400">__init__</span>(<span class="text-red-400">self</span>):
+        <span class="text-red-400">self</span>.timestamp = datetime.utcnow().strftime(<span class="text-green-400">"%Y%m%d_%H%M%S"</span>)
+        <span class="text-red-400">self</span>.backup_path = BACKUP_DIR / <span class="text-red-400">self</span>.timestamp
+        <span class="text-red-400">self</span>.manifest = {
+            <span class="text-green-400">"timestamp"</span>: <span class="text-red-400">self</span>.timestamp,
+            <span class="text-green-400">"plates"</span>: [],
+            <span class="text-green-400">"firmware"</span>: [],
+            <span class="text-green-400">"hashes"</span>: {}
+        }
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">backup_plates</span>(<span class="text-red-400">self</span>) -> <span class="text-amber-400">int</span>:
+        <span class="text-gray-500">"""Backup all GHMP plates."""</span>
+        plates_backup = <span class="text-red-400">self</span>.backup_path / <span class="text-green-400">"plates"</span>
+        plates_backup.mkdir(parents=<span class="text-amber-400">True</span>, exist_ok=<span class="text-amber-400">True</span>)
+
+        count = <span class="text-amber-400">0</span>
+        <span class="text-purple-400">for</span> plate_file <span class="text-purple-400">in</span> PLATES_DIR.glob(<span class="text-green-400">"*.ghmp"</span>):
+            dest = plates_backup / plate_file.name
+            shutil.copy2(plate_file, dest)
+
+            <span class="text-gray-500"># Generate hash</span>
+            file_hash = <span class="text-red-400">self</span>._hash_file(plate_file)
+            <span class="text-red-400">self</span>.manifest[<span class="text-green-400">"plates"</span>].append(plate_file.name)
+            <span class="text-red-400">self</span>.manifest[<span class="text-green-400">"hashes"</span>][plate_file.name] = file_hash
+            count += <span class="text-amber-400">1</span>
+
+        <span class="text-purple-400">return</span> count
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">backup_firmware</span>(<span class="text-red-400">self</span>) -> <span class="text-amber-400">bool</span>:
+        <span class="text-gray-500">"""Backup firmware artifacts."""</span>
+        fw_backup = <span class="text-red-400">self</span>.backup_path / <span class="text-green-400">"firmware"</span>
+        fw_backup.mkdir(parents=<span class="text-amber-400">True</span>, exist_ok=<span class="text-amber-400">True</span>)
+
+        artifacts = [<span class="text-green-400">"firmware.bin"</span>, <span class="text-green-400">"partitions.bin"</span>]
+        <span class="text-purple-400">for</span> artifact <span class="text-purple-400">in</span> artifacts:
+            src = FIRMWARE_DIR / artifact
+            <span class="text-purple-400">if</span> src.exists():
+                shutil.copy2(src, fw_backup / artifact)
+                <span class="text-red-400">self</span>.manifest[<span class="text-green-400">"firmware"</span>].append(artifact)
+                <span class="text-red-400">self</span>.manifest[<span class="text-green-400">"hashes"</span>][artifact] = <span class="text-red-400">self</span>._hash_file(src)
+
+        <span class="text-purple-400">return</span> <span class="text-amber-400">len</span>(<span class="text-red-400">self</span>.manifest[<span class="text-green-400">"firmware"</span>]) > <span class="text-amber-400">0</span>
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">write_manifest</span>(<span class="text-red-400">self</span>):
+        <span class="text-gray-500">"""Write backup manifest."""</span>
+        manifest_path = <span class="text-red-400">self</span>.backup_path / <span class="text-green-400">"manifest.json"</span>
+        <span class="text-purple-400">with</span> <span class="text-amber-400">open</span>(manifest_path, <span class="text-green-400">"w"</span>) <span class="text-purple-400">as</span> f:
+            json.dump(<span class="text-red-400">self</span>.manifest, f, indent=<span class="text-amber-400">2</span>)
+
+    <span class="text-purple-400">def</span> <span class="text-blue-400">_hash_file</span>(<span class="text-red-400">self</span>, path: Path) -> <span class="text-amber-400">str</span>:
+        <span class="text-gray-500">"""Generate SHA-256 hash of file."""</span>
+        sha256 = hashlib.sha256()
+        <span class="text-purple-400">with</span> <span class="text-amber-400">open</span>(path, <span class="text-green-400">"rb"</span>) <span class="text-purple-400">as</span> f:
+            <span class="text-purple-400">for</span> chunk <span class="text-purple-400">in</span> <span class="text-amber-400">iter</span>(<span class="text-purple-400">lambda</span>: f.read(<span class="text-amber-400">8192</span>), <span class="text-green-400">b""</span>):
+                sha256.update(chunk)
+        <span class="text-purple-400">return</span> sha256.hexdigest()
+
+<span class="text-purple-400">if</span> __name__ == <span class="text-green-400">"__main__"</span>:
+    backup = GHMPCeremonyBackup()
+
+    plates = backup.backup_plates()
+    <span class="text-amber-400">print</span>(<span class="text-green-400">f"Backed up {plates} GHMP plates"</span>)
+
+    <span class="text-purple-400">if</span> backup.backup_firmware():
+        <span class="text-amber-400">print</span>(<span class="text-green-400">"Firmware artifacts backed up"</span>)
+
+    backup.write_manifest()
+    <span class="text-amber-400">print</span>(<span class="text-green-400">f"Manifest written to {backup.backup_path}"</span>)</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Artifact Output -->
+        <div class="terminal rounded-xl overflow-hidden mb-12">
+            <div class="px-6 py-4 border-b border-green-500/20 flex items-center justify-between">
+                <h3 class="font-bold text-white">Generated Artifacts</h3>
+                <span id="artifactStatus" class="mono text-xs text-gray-500">Awaiting build...</span>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="artifactGrid">
+                    <!-- Firmware Artifacts -->
+                    <div class="bg-void-800/50 rounded-lg p-4">
+                        <div class="text-foxfire-400 font-semibold mb-3">Firmware</div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center justify-between text-gray-400">
+                                <span class="mono">firmware.bin</span>
+                                <span id="fwStatus" class="text-gray-600">-</span>
+                            </div>
+                            <div class="flex items-center justify-between text-gray-400">
+                                <span class="mono">partitions.bin</span>
+                                <span id="partStatus" class="text-gray-600">-</span>
+                            </div>
+                            <div class="flex items-center justify-between text-gray-400">
+                                <span class="mono">firmware.elf</span>
+                                <span id="elfStatus" class="text-gray-600">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GHMP Backups -->
+                    <div class="bg-void-800/50 rounded-lg p-4">
+                        <div class="text-purple-400 font-semibold mb-3">GHMP Backups</div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center justify-between text-gray-400">
+                                <span class="mono">constraint.ghmp</span>
+                                <span id="ghmp1" class="text-gray-600">-</span>
+                            </div>
+                            <div class="flex items-center justify-between text-gray-400">
+                                <span class="mono">bridge.ghmp</span>
+                                <span id="ghmp2" class="text-gray-600">-</span>
+                            </div>
+                            <div class="flex items-center justify-between text-gray-400">
+                                <span class="mono">meta.ghmp</span>
+                                <span id="ghmp3" class="text-gray-600">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ceremony Records -->
+                    <div class="bg-void-800/50 rounded-lg p-4">
+                        <div class="text-green-400 font-semibold mb-3">Ceremony Records</div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center justify-between text-gray-400">
+                                <span class="mono">manifest.json</span>
+                                <span id="manifest" class="text-gray-600">-</span>
+                            </div>
+                            <div class="flex items-center justify-between text-gray-400">
+                                <span class="mono">ceremony.log</span>
+                                <span id="ceremony" class="text-gray-600">-</span>
+                            </div>
+                            <div class="flex items-center justify-between text-gray-400">
+                                <span class="mono">witness.hash</span>
+                                <span id="witness" class="text-gray-600">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase Summary -->
+        <div class="terminal rounded-xl p-6 purple-glow">
+            <h3 class="font-bold text-white text-lg mb-4">Phase 3 Summary</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+                <div>
+                    <div id="totalCycles" class="text-3xl font-bold text-purple-400">0</div>
+                    <div class="text-gray-500 text-sm">Triadic Cycles</div>
+                </div>
+                <div>
+                    <div id="buildCount" class="text-3xl font-bold text-foxfire-400">0</div>
+                    <div class="text-gray-500 text-sm">Build Runs</div>
+                </div>
+                <div>
+                    <div id="backupCount" class="text-3xl font-bold text-green-400">0</div>
+                    <div class="text-gray-500 text-sm">Backups Created</div>
+                </div>
+                <div>
+                    <div id="ceremonyZ" class="text-3xl font-bold text-amber-400">0.90</div>
+                    <div class="text-gray-500 text-sm">Current z-Level</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // State
+        let cycleCount = 0;
+        let buildCount = 0;
+        let backupCount = 0;
+        let currentZ = 0.90;
+
+        // Triadic Cycle
+        document.getElementById('startTriadic').addEventListener('click', function() {
+            this.disabled = true;
+            this.textContent = 'Running...';
+
+            let cycle = 0;
+            const nodes = ['node1', 'node2', 'node3'];
+
+            const runCycle = () => {
+                if (cycle >= 3) {
+                    cycleCount++;
+                    document.getElementById('cycleCount').textContent = cycleCount;
+                    document.getElementById('totalCycles').textContent = cycleCount;
+
+                    currentZ = Math.min(0.99, currentZ + 0.01);
+                    document.getElementById('ceremonyZ').textContent = currentZ.toFixed(2);
+
+                    this.disabled = false;
+                    this.textContent = 'Start Cycle';
+                    return;
+                }
+
+                // Highlight current node
+                nodes.forEach((n, i) => {
+                    const el = document.getElementById(n);
+                    if (i === cycle) {
+                        el.querySelector('circle:last-of-type').setAttribute('fill', '#22c55e');
+                    } else {
+                        el.querySelector('circle:last-of-type').setAttribute('fill', i === 0 ? '#a855f7' : i === 1 ? '#8b5cf6' : '#7c3aed');
+                    }
+                });
+
+                cycle++;
+                setTimeout(runCycle, 800);
+            };
+
+            runCycle();
+        });
+
+        // Build Pipeline
+        document.getElementById('startBuild').addEventListener('click', function() {
+            this.disabled = true;
+            this.textContent = 'Building...';
+
+            const output = document.getElementById('buildOutput');
+            output.innerHTML = '';
+
+            const steps = [
+                { id: 1, msg: ['> pio run --target clean', 'Cleaning build directory...', 'Done!'] },
+                { id: 2, msg: ['> pio run -e esp32s3', 'Compiling source files...', 'Building firmware...', 'Linking...'] },
+                { id: 3, msg: ['> Generating artifacts...', 'firmware.bin: 1.2MB', 'partitions.bin: 3KB', 'firmware.elf: 2.8MB'] },
+                { id: 4, msg: ['> python ghmp_ceremony_backup.py', 'Backing up 7 GHMP plates...', 'Writing manifest...', 'Done!'] }
+            ];
+
+            let stepIdx = 0;
+            let msgIdx = 0;
+
+            const runStep = () => {
+                if (stepIdx >= steps.length) {
+                    buildCount++;
+                    backupCount++;
+                    document.getElementById('buildCount').textContent = buildCount;
+                    document.getElementById('backupCount').textContent = backupCount;
+                    document.getElementById('artifactStatus').textContent = 'Complete';
+                    document.getElementById('artifactStatus').className = 'mono text-xs text-green-400';
+
+                    // Update artifact statuses
+                    document.getElementById('fwStatus').textContent = '1.2MB';
+                    document.getElementById('fwStatus').className = 'text-green-400';
+                    document.getElementById('partStatus').textContent = '3KB';
+                    document.getElementById('partStatus').className = 'text-green-400';
+                    document.getElementById('elfStatus').textContent = '2.8MB';
+                    document.getElementById('elfStatus').className = 'text-green-400';
+                    document.getElementById('ghmp1').textContent = 'Backed';
+                    document.getElementById('ghmp1').className = 'text-green-400';
+                    document.getElementById('ghmp2').textContent = 'Backed';
+                    document.getElementById('ghmp2').className = 'text-green-400';
+                    document.getElementById('ghmp3').textContent = 'Backed';
+                    document.getElementById('ghmp3').className = 'text-green-400';
+                    document.getElementById('manifest').textContent = 'Created';
+                    document.getElementById('manifest').className = 'text-green-400';
+                    document.getElementById('ceremony').textContent = 'Written';
+                    document.getElementById('ceremony').className = 'text-green-400';
+                    document.getElementById('witness').textContent = 'a7f3...e2b1';
+                    document.getElementById('witness').className = 'text-green-400';
+
+                    this.disabled = false;
+                    this.textContent = 'Run Build';
+                    return;
+                }
+
+                const step = steps[stepIdx];
+                const stepEl = document.getElementById('buildStep' + step.id);
+                const statusEl = document.getElementById('status' + step.id);
+
+                stepEl.classList.add('active');
+                statusEl.textContent = 'Running...';
+                statusEl.className = 'text-amber-400 text-sm';
+
+                const showMsg = () => {
+                    if (msgIdx >= step.msg.length) {
+                        stepEl.classList.remove('active');
+                        stepEl.classList.add('complete');
+                        statusEl.textContent = 'Complete';
+                        statusEl.className = 'text-green-400 text-sm';
+
+                        stepIdx++;
+                        msgIdx = 0;
+                        setTimeout(runStep, 300);
+                        return;
+                    }
+
+                    const color = step.msg[msgIdx].startsWith('>') ? 'text-foxfire-400' :
+                                  step.msg[msgIdx].includes('Done') ? 'text-green-400' : 'text-gray-400';
+                    output.innerHTML += `<div class="${color}">${step.msg[msgIdx]}</div>`;
+                    output.scrollTop = output.scrollHeight;
+
+                    msgIdx++;
+                    setTimeout(showMsg, 400);
+                };
+
+                showMsg();
+            };
+
+            runStep();
+        });
+    </script>
+</body>
+</html>
