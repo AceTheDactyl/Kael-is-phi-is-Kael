@@ -1,0 +1,25 @@
+site_name: Rosetta Bear Project
+site_description: LIMNUS Fractal System | WUMBO APL Architecture | Zero-Point Energy | Neurodivergent Neural Architecture
+repo_url: https://github.com/AceTheDactyl/Rosetta-bear-project
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: deep purple
+    accent: amber
+  features:
+    - navigation.tabs
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+nav:
+  - Home: index.md
+  - Architecture:
+      - Overview: index.md
+      - Changelog: CHANGELOG.md
+  - Interactive Systems:
+      - LIMNUS Fractal: ../zero-point-energy.html
+      - WUMBO APL Directory: ../wumbo-apl-directory.html
+      - WUMBO Engine: ../wumbo-engine.html
+      - The Manual: ../visualizations/the_manual.html
