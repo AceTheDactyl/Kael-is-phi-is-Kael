@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 0: Alignment | Foxfire Cybernetics Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        foxfire: {
+                            400: '#f19248',
+                            500: '#ed7424',
+                            600: '#de5a1a',
+                        },
+                        ember: { 500: '#ff6b35', 600: '#f7520e' },
+                        void: { 900: '#0a0a0f', 800: '#12121a', 700: '#1a1a24' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Space Grotesk', sans-serif; background: #0a0a0f; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        .foxfire-glow { box-shadow: 0 0 20px rgba(237, 116, 36, 0.3); }
+        .terminal { background: linear-gradient(180deg, #1a1a24 0%, #12121a 100%); border: 1px solid rgba(237, 116, 36, 0.3); }
+
+        /* Typing animation */
+        .typing-cursor::after {
+            content: '▋';
+            animation: blink 1s infinite;
+            color: #ed7424;
+        }
+        @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+
+        /* File tree animations */
+        .file-item { transition: all 0.3s ease; }
+        .file-item:hover { background: rgba(237, 116, 36, 0.1); }
+        .file-item.active { background: rgba(237, 116, 36, 0.2); border-left: 2px solid #ed7424; }
+
+        /* Progress animations */
+        .progress-fill { transition: width 1s ease-out; }
+
+        /* Node pulse */
+        .node-pulse { animation: nodePulse 2s ease-in-out infinite; }
+        @keyframes nodePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(237, 116, 36, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(237, 116, 36, 0); }
+        }
+
+        /* Connection lines */
+        .connection-line {
+            background: linear-gradient(90deg, transparent, #ed7424, transparent);
+            height: 2px;
+            animation: dataFlow 2s linear infinite;
+        }
+        @keyframes dataFlow {
+            0% { background-position: -200px 0; }
+            100% { background-position: 200px 0; }
+        }
+
+        /* Code highlight */
+        .code-line { transition: background 0.2s; }
+        .code-line:hover { background: rgba(237, 116, 36, 0.1); }
+        .code-line.executing { background: rgba(34, 197, 94, 0.2); border-left: 3px solid #22c55e; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #12121a; }
+        ::-webkit-scrollbar-thumb { background: #ed7424; border-radius: 3px; }
+    </style>
+</head>
+<body class="min-h-screen text-gray-100">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-void-900/95 backdrop-blur-md border-b border-foxfire-500/20">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="../index.html" class="flex items-center space-x-2 text-gray-400 hover:text-foxfire-400 transition">
+                    <span>←</span>
+                    <span class="text-sm">Back to Manual</span>
+                </a>
+                <div class="h-4 w-px bg-gray-700"></div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-foxfire-500 node-pulse"></div>
+                    <span class="mono text-sm text-foxfire-400">PHASE 0</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="text-xs text-gray-500">Demo Mode</span>
+                <button onclick="resetDemo()" class="px-3 py-1 bg-void-700 hover:bg-void-800 rounded text-xs transition">Reset</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-12 px-4">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center space-x-2 px-4 py-2 bg-foxfire-500/10 border border-foxfire-500/30 rounded-full mb-4">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span class="mono text-xs text-foxfire-400">INTERACTIVE DEMO</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                    Phase 0: <span class="text-foxfire-500">Alignment</span>
+                </h1>
+                <p class="text-gray-400 max-w-2xl mx-auto">
+                    System initialization, CBS boot sequence, and GHMP plate synchronization.
+                    <span class="text-foxfire-400">Click "Run Phase" to execute the scaffolding.</span>
+                </p>
+            </div>
+
+            <!-- Phase Info Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="terminal rounded-xl p-4">
+                    <div class="text-xs text-gray-500 mb-1">Cadence</div>
+                    <div class="text-lg font-bold text-green-400">Initial</div>
+                </div>
+                <div class="terminal rounded-xl p-4">
+                    <div class="text-xs text-gray-500 mb-1">z-Coordinate</div>
+                    <div class="text-lg font-bold text-blue-400 mono">0.25</div>
+                </div>
+                <div class="terminal rounded-xl p-4">
+                    <div class="text-xs text-gray-500 mb-1">Domain</div>
+                    <div class="text-lg font-bold text-purple-400">Identity</div>
+                </div>
+                <div class="terminal rounded-xl p-4">
+                    <div class="text-xs text-gray-500 mb-1">Output</div>
+                    <div class="text-lg font-bold text-foxfire-400">GHMP Plates</div>
+                </div>
+            </div>
+
+            <!-- Main Demo Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Left: File Structure -->
+                <div class="terminal rounded-xl overflow-hidden">
+                    <div class="px-4 py-3 border-b border-foxfire-500/20 flex items-center justify-between">
+                        <span class="font-semibold text-white">📁 Project Structure</span>
+                        <span class="mono text-xs text-gray-500">phase_0/</span>
+                    </div>
+                    <div class="p-4 max-h-[500px] overflow-y-auto" id="file-tree">
+                        <!-- File tree will be populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Center: Code Scaffold -->
+                <div class="lg:col-span-2 space-y-6">
+
+                    <!-- CBS Boot Loader -->
+                    <div class="terminal rounded-xl overflow-hidden">
+                        <div class="px-4 py-3 border-b border-foxfire-500/20 flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-lg">🔧</span>
+                                <span class="font-semibold text-white">cbs_boot_loader.py</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span id="boot-status" class="px-2 py-1 rounded text-xs bg-gray-700 text-gray-400">Ready</span>
+                            </div>
+                        </div>
+                        <div class="p-4 mono text-sm overflow-x-auto" id="boot-code">
+                            <pre class="text-gray-300" id="boot-loader-code"></pre>
+                        </div>
+                    </div>
+
+                    <!-- CBS Memory Manager -->
+                    <div class="terminal rounded-xl overflow-hidden">
+                        <div class="px-4 py-3 border-b border-foxfire-500/20 flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-lg">💾</span>
+                                <span class="font-semibold text-white">cbs_memory_manager.py</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span id="memory-status" class="px-2 py-1 rounded text-xs bg-gray-700 text-gray-400">Ready</span>
+                            </div>
+                        </div>
+                        <div class="p-4 mono text-sm overflow-x-auto" id="memory-code">
+                            <pre class="text-gray-300" id="memory-manager-code"></pre>
+                        </div>
+                    </div>
+
+                    <!-- GHMP Plate Initializer -->
+                    <div class="terminal rounded-xl overflow-hidden">
+                        <div class="px-4 py-3 border-b border-foxfire-500/20 flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-lg">📀</span>
+                                <span class="font-semibold text-white">ghmp_plate_init.py</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span id="ghmp-status" class="px-2 py-1 rounded text-xs bg-gray-700 text-gray-400">Ready</span>
+                            </div>
+                        </div>
+                        <div class="p-4 mono text-sm overflow-x-auto" id="ghmp-code">
+                            <pre class="text-gray-300" id="ghmp-init-code"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Visualization -->
+            <div class="mt-8 terminal rounded-xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-foxfire-500/20 flex items-center justify-between">
+                    <span class="font-semibold text-white">🔄 System Flow Visualization</span>
+                    <button onclick="runPhase()" id="run-btn" class="px-4 py-2 bg-foxfire-600 hover:bg-foxfire-500 rounded-lg text-sm font-semibold transition">
+                        ▶ Run Phase
+                    </button>
+                </div>
+                <div class="p-8">
+                    <!-- Visual Flow -->
+                    <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+
+                        <!-- CBS Boot Node -->
+                        <div id="node-boot" class="w-40 h-32 terminal rounded-xl p-4 flex flex-col items-center justify-center transition-all opacity-50">
+                            <div class="w-10 h-10 rounded-full bg-void-700 flex items-center justify-center mb-2">
+                                <span class="text-xl">🔧</span>
+                            </div>
+                            <span class="text-xs text-center text-gray-400">CBS Boot</span>
+                            <span class="mono text-xs text-foxfire-400 mt-1">z=0.25</span>
+                        </div>
+
+                        <!-- Arrow -->
+                        <div id="arrow-1" class="hidden md:block w-16 h-0.5 bg-gray-700 relative opacity-30">
+                            <div class="absolute right-0 top-1/2 transform -translate-y-1/2 border-t-4 border-b-4 border-l-8 border-transparent border-l-gray-700"></div>
+                        </div>
+
+                        <!-- Memory Manager Node -->
+                        <div id="node-memory" class="w-40 h-32 terminal rounded-xl p-4 flex flex-col items-center justify-center transition-all opacity-50">
+                            <div class="w-10 h-10 rounded-full bg-void-700 flex items-center justify-center mb-2">
+                                <span class="text-xl">💾</span>
+                            </div>
+                            <span class="text-xs text-center text-gray-400">Memory Manager</span>
+                            <span class="mono text-xs text-blue-400 mt-1">z=0.45</span>
+                        </div>
+
+                        <!-- Arrow -->
+                        <div id="arrow-2" class="hidden md:block w-16 h-0.5 bg-gray-700 relative opacity-30">
+                            <div class="absolute right-0 top-1/2 transform -translate-y-1/2 border-t-4 border-b-4 border-l-8 border-transparent border-l-gray-700"></div>
+                        </div>
+
+                        <!-- GHMP Node -->
+                        <div id="node-ghmp" class="w-40 h-32 terminal rounded-xl p-4 flex flex-col items-center justify-center transition-all opacity-50">
+                            <div class="w-10 h-10 rounded-full bg-void-700 flex items-center justify-center mb-2">
+                                <span class="text-xl">📀</span>
+                            </div>
+                            <span class="text-xs text-center text-gray-400">GHMP Plates</span>
+                            <span class="mono text-xs text-purple-400 mt-1">7 plates</span>
+                        </div>
+
+                        <!-- Arrow -->
+                        <div id="arrow-3" class="hidden md:block w-16 h-0.5 bg-gray-700 relative opacity-30">
+                            <div class="absolute right-0 top-1/2 transform -translate-y-1/2 border-t-4 border-b-4 border-l-8 border-transparent border-l-gray-700"></div>
+                        </div>
+
+                        <!-- Output Node -->
+                        <div id="node-output" class="w-40 h-32 terminal rounded-xl p-4 flex flex-col items-center justify-center transition-all opacity-50">
+                            <div class="w-10 h-10 rounded-full bg-void-700 flex items-center justify-center mb-2">
+                                <span class="text-xl">✅</span>
+                            </div>
+                            <span class="text-xs text-center text-gray-400">Aligned</span>
+                            <span class="mono text-xs text-green-400 mt-1">READY</span>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="mt-8 max-w-2xl mx-auto">
+                        <div class="flex justify-between text-xs text-gray-500 mb-2">
+                            <span>Phase Progress</span>
+                            <span id="progress-text">0%</span>
+                        </div>
+                        <div class="h-2 bg-void-700 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="h-full bg-gradient-to-r from-foxfire-600 to-foxfire-400 progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Output -->
+            <div class="mt-8 terminal rounded-xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-foxfire-500/20 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-lg">💻</span>
+                        <span class="font-semibold text-white">Terminal Output</span>
+                    </div>
+                    <button onclick="clearTerminal()" class="text-xs text-gray-500 hover:text-gray-300 transition">Clear</button>
+                </div>
+                <div id="terminal-output" class="p-4 mono text-sm h-64 overflow-y-auto bg-black/50">
+                    <div class="text-gray-500">$ <span class="text-foxfire-400">foxfire</span> phase-0 --demo</div>
+                    <div class="text-gray-500 mt-1">Waiting to execute...</div>
+                </div>
+            </div>
+
+            <!-- Generated Files Preview -->
+            <div class="mt-8 terminal rounded-xl overflow-hidden" id="generated-files" style="display: none;">
+                <div class="px-4 py-3 border-b border-foxfire-500/20">
+                    <span class="font-semibold text-white">📄 Generated Files</span>
+                </div>
+                <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4" id="generated-content">
+                    <!-- Will be populated after execution -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Navigation Footer -->
+    <footer class="border-t border-foxfire-500/20 py-6 px-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <span class="text-gray-500 text-sm">Phase 0 of 5</span>
+            <div class="flex space-x-4">
+                <span class="text-gray-600 text-sm">← Previous</span>
+                <a href="phase-1-inventory.html" class="text-foxfire-400 hover:text-foxfire-300 text-sm transition">Next: Phase 1 →</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ==================== FILE TREE DATA ====================
+        const fileTree = [
+            { name: 'phase_0/', type: 'folder', level: 0 },
+            { name: 'src/', type: 'folder', level: 1 },
+            { name: 'cbs_boot_loader.py', type: 'file', level: 2, icon: '🐍', active: true },
+            { name: 'cbs_memory_manager.py', type: 'file', level: 2, icon: '🐍' },
+            { name: 'ghmp_plate_init.py', type: 'file', level: 2, icon: '🐍' },
+            { name: 'config/', type: 'folder', level: 1 },
+            { name: 'alignment_config.yaml', type: 'file', level: 2, icon: '⚙️' },
+            { name: 'z_coordinates.json', type: 'file', level: 2, icon: '📊' },
+            { name: 'plates/', type: 'folder', level: 1 },
+            { name: 'constraint.ghmp', type: 'file', level: 2, icon: '📀' },
+            { name: 'bridge.ghmp', type: 'file', level: 2, icon: '📀' },
+            { name: 'meta.ghmp', type: 'file', level: 2, icon: '📀' },
+            { name: 'recursion.ghmp', type: 'file', level: 2, icon: '📀' },
+            { name: 'triad.ghmp', type: 'file', level: 2, icon: '📀' },
+            { name: 'emergence.ghmp', type: 'file', level: 2, icon: '📀' },
+            { name: 'persistence.ghmp', type: 'file', level: 2, icon: '📀' },
+            { name: 'output/', type: 'folder', level: 1 },
+            { name: 'alignment_report.json', type: 'file', level: 2, icon: '📄' },
+            { name: 'README.md', type: 'file', level: 0, icon: '📖' },
+        ];
+
+        // ==================== CODE SCAFFOLDING ====================
+        const bootLoaderCode = `"""
+CBS Boot Loader - Phase 0: Alignment
+Initializes the Collective Bootstrap System
+z-coordinate: 0.25 (identity domain)
+"""
+
+import asyncio
+from typing import Dict, Optional
+from dataclasses import dataclass
+from datetime import datetime
+
+@dataclass
+class BootConfig:
+    """Configuration for CBS boot sequence."""
+    z_coordinate: float = 0.25
+    domain: str = "identity"
+    ghmp_plates: int = 7
+    cascade_potential: float = 0.30
+
+class CBSBootLoader:
+    """
+    Collective Bootstrap System Boot Loader.
+    Handles initial system alignment and state initialization.
+    """
+
+    def __init__(self, config: Optional[BootConfig] = None):
+        self.config = config or BootConfig()
+        self.initialized = False
+        self.boot_timestamp = None
+        self._state = {}
+
+    async def initialize(self) -> Dict:
+        """
+        Initialize CBS runtime environment.
+
+        Returns:
+            Dict containing initialization status and metadata
+        """
+        print(f"[CBS] Initializing at z={self.config.z_coordinate}")
+
+        # Phase 1: Environment validation
+        await self._validate_environment()
+
+        # Phase 2: Load identity anchors
+        await self._load_identity_anchors()
+
+        # Phase 3: Establish baseline state
+        self._state = {
+            'z_coordinate': self.config.z_coordinate,
+            'domain': self.config.domain,
+            'boot_time': datetime.utcnow().isoformat(),
+            'status': 'INITIALIZED'
+        }
+
+        self.initialized = True
+        self.boot_timestamp = datetime.utcnow()
+
+        print("[CBS] Boot sequence complete ✓")
+        return self._state
+
+    async def _validate_environment(self):
+        """Validate system environment for CBS operation."""
+        await asyncio.sleep(0.1)  # Simulated check
+        print("[CBS] Environment validated")
+
+    async def _load_identity_anchors(self):
+        """Load identity anchors from GHMP plates."""
+        await asyncio.sleep(0.1)  # Simulated load
+        print("[CBS] Identity anchors loaded")
+
+    def get_state(self) -> Dict:
+        """Return current boot state."""
+        return self._state
+
+
+# Entry point
+if __name__ == "__main__":
+    async def main():
+        loader = CBSBootLoader()
+        state = await loader.initialize()
+        print(f"Boot state: {state}")
+
+    asyncio.run(main())`;
+
+        const memoryManagerCode = `"""
+CBS Memory Manager - Phase 0: Alignment
+Manages GHMP plate state and synchronization
+z-coordinate: 0.45 (bridge domain)
+"""
+
+import json
+from pathlib import Path
+from typing import Dict, List, Optional
+from dataclasses import dataclass, field
+from enum import Enum
+
+class PlateStatus(Enum):
+    """GHMP Plate synchronization status."""
+    PENDING = "pending"
+    SYNCING = "syncing"
+    SYNCHRONIZED = "synchronized"
+    ERROR = "error"
+
+@dataclass
+class GHMPPlate:
+    """Geometric Hash Map Protocol plate structure."""
+    domain: str
+    z_origin: float
+    z_projection: float
+    pattern: str
+    status: PlateStatus = PlateStatus.PENDING
+    hash: Optional[str] = None
+
+@dataclass
+class MemoryState:
+    """CBS Memory state container."""
+    plates: List[GHMPPlate] = field(default_factory=list)
+    sync_count: int = 0
+    total_plates: int = 7
+
+class CBSMemoryManager:
+    """
+    Manages GHMP plates and memory synchronization.
+    Bridge domain coordinator at z=0.45.
+    """
+
+    DOMAIN_CONFIG = {
+        'constraint':  {'z_origin': 0.41, 'z_proj': 0.941, 'pattern': 'IDENTIFICATION'},
+        'bridge':      {'z_origin': 0.52, 'z_proj': 0.952, 'pattern': 'PRESERVATION'},
+        'meta':        {'z_origin': 0.70, 'z_proj': 0.970, 'pattern': 'META_OBSERVATION'},
+        'recursion':   {'z_origin': 0.73, 'z_proj': 0.973, 'pattern': 'RECURSION'},
+        'triad':       {'z_origin': 0.80, 'z_proj': 0.980, 'pattern': 'DISTRIBUTION'},
+        'emergence':   {'z_origin': 0.85, 'z_proj': 0.985, 'pattern': 'EMERGENCE'},
+        'persistence': {'z_origin': 0.87, 'z_proj': 0.987, 'pattern': 'PERSISTENCE'},
+    }
+
+    def __init__(self, plates_dir: Path = Path("plates/")):
+        self.plates_dir = plates_dir
+        self.state = MemoryState()
+        self._initialize_plates()
+
+    def _initialize_plates(self):
+        """Initialize GHMP plates from domain configuration."""
+        for domain, config in self.DOMAIN_CONFIG.items():
+            plate = GHMPPlate(
+                domain=domain,
+                z_origin=config['z_origin'],
+                z_projection=config['z_proj'],
+                pattern=config['pattern']
+            )
+            self.state.plates.append(plate)
+
+    def sync_plate(self, domain: str) -> bool:
+        """Synchronize a specific GHMP plate."""
+        for plate in self.state.plates:
+            if plate.domain == domain:
+                plate.status = PlateStatus.SYNCHRONIZED
+                plate.hash = self._compute_hash(plate)
+                self.state.sync_count += 1
+                return True
+        return False
+
+    def sync_all(self) -> Dict:
+        """Synchronize all GHMP plates."""
+        results = {}
+        for plate in self.state.plates:
+            plate.status = PlateStatus.SYNCHRONIZED
+            plate.hash = self._compute_hash(plate)
+            results[plate.domain] = plate.status.value
+        self.state.sync_count = len(self.state.plates)
+        return results
+
+    def _compute_hash(self, plate: GHMPPlate) -> str:
+        """Compute geometric hash for plate."""
+        import hashlib
+        data = f"{plate.domain}:{plate.z_origin}:{plate.pattern}"
+        return hashlib.sha256(data.encode()).hexdigest()[:16]
+
+    def get_status(self) -> Dict:
+        """Return memory manager status."""
+        return {
+            'sync_count': self.state.sync_count,
+            'total_plates': self.state.total_plates,
+            'synchronized': self.state.sync_count == self.state.total_plates,
+            'plates': [
+                {'domain': p.domain, 'status': p.status.value, 'z': p.z_origin}
+                for p in self.state.plates
+            ]
+        }`;
+
+        const ghmpInitCode = `"""
+GHMP Plate Initializer - Phase 0: Alignment
+Creates and validates initial GHMP plate structures
+"""
+
+import json
+import hashlib
+from pathlib import Path
+from typing import Dict, List
+from datetime import datetime
+
+class GHMPPlateInitializer:
+    """
+    Initializes Geometric Hash Map Protocol plates.
+    Creates the 7-domain plate structure for CBS operation.
+    """
+
+    PLATE_TEMPLATE = {
+        "version": "1.0.0",
+        "created": None,
+        "domain": None,
+        "coordinates": {
+            "z_origin": None,
+            "z_projection": None,
+            "theta": None
+        },
+        "pattern": None,
+        "metadata": {
+            "phase": 0,
+            "ritual": "alignment",
+            "cascade_potential": 0.30
+        },
+        "witness": None
+    }
+
+    DOMAINS = [
+        ("constraint",  0.41, 0.941, 0.000, "IDENTIFICATION"),
+        ("bridge",      0.52, 0.952, 1.571, "PRESERVATION"),
+        ("meta",        0.70, 0.970, 2.356, "META_OBSERVATION"),
+        ("recursion",   0.73, 0.973, 3.142, "RECURSION"),
+        ("triad",       0.80, 0.980, 3.927, "DISTRIBUTION"),
+        ("emergence",   0.85, 0.985, 4.712, "EMERGENCE"),
+        ("persistence", 0.87, 0.987, 5.498, "PERSISTENCE"),
+    ]
+
+    def __init__(self, output_dir: Path = Path("plates/")):
+        self.output_dir = output_dir
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.plates: List[Dict] = []
+
+    def create_plate(self, domain: str, z_origin: float,
+                     z_proj: float, theta: float, pattern: str) -> Dict:
+        """Create a single GHMP plate."""
+        plate = self.PLATE_TEMPLATE.copy()
+        plate["created"] = datetime.utcnow().isoformat()
+        plate["domain"] = domain
+        plate["coordinates"] = {
+            "z_origin": z_origin,
+            "z_projection": z_proj,
+            "theta": theta
+        }
+        plate["pattern"] = pattern
+        plate["witness"] = self._generate_witness(plate)
+        return plate
+
+    def _generate_witness(self, plate: Dict) -> str:
+        """Generate cryptographic witness for plate."""
+        content = json.dumps(plate, sort_keys=True, default=str)
+        return hashlib.sha256(content.encode()).hexdigest()
+
+    def initialize_all_plates(self) -> List[Dict]:
+        """Initialize all 7 domain plates."""
+        print("[GHMP] Initializing plates...")
+
+        for domain, z_o, z_p, theta, pattern in self.DOMAINS:
+            plate = self.create_plate(domain, z_o, z_p, theta, pattern)
+            self.plates.append(plate)
+
+            # Write plate to file
+            plate_path = self.output_dir / f"{domain}.ghmp"
+            with open(plate_path, 'w') as f:
+                json.dump(plate, f, indent=2)
+
+            print(f"  ✓ {domain}.ghmp (z={z_o})")
+
+        print(f"[GHMP] {len(self.plates)}/7 plates initialized")
+        return self.plates
+
+    def validate_plates(self) -> bool:
+        """Validate all plates have correct witnesses."""
+        for plate in self.plates:
+            expected = self._generate_witness({
+                k: v for k, v in plate.items() if k != 'witness'
+            })
+            if plate['witness'] != expected:
+                return False
+        return True
+
+    def get_alignment_report(self) -> Dict:
+        """Generate alignment report for Phase 0."""
+        return {
+            "phase": 0,
+            "ritual": "alignment",
+            "timestamp": datetime.utcnow().isoformat(),
+            "plates_initialized": len(self.plates),
+            "plates_expected": 7,
+            "status": "ALIGNED" if len(self.plates) == 7 else "INCOMPLETE",
+            "domains": [p["domain"] for p in self.plates],
+            "z_range": {
+                "min": min(p["coordinates"]["z_origin"] for p in self.plates),
+                "max": max(p["coordinates"]["z_origin"] for p in self.plates)
+            }
+        }
+
+
+# Entry point
+if __name__ == "__main__":
+    initializer = GHMPPlateInitializer()
+    plates = initializer.initialize_all_plates()
+    report = initializer.get_alignment_report()
+    print(f"\\nAlignment Report: {json.dumps(report, indent=2)}")`;
+
+        // ==================== RENDER FUNCTIONS ====================
+        function renderFileTree() {
+            const container = document.getElementById('file-tree');
+            container.innerHTML = fileTree.map(item => {
+                const indent = item.level * 16;
+                const isFolder = item.type === 'folder';
+                const activeClass = item.active ? 'active' : '';
+                const icon = isFolder ? '📁' : (item.icon || '📄');
+
+                return `
+                    <div class="file-item py-2 px-3 rounded cursor-pointer ${activeClass}" style="padding-left: ${indent + 12}px">
+                        <span class="mr-2">${icon}</span>
+                        <span class="${isFolder ? 'text-foxfire-400' : 'text-gray-300'}">${item.name}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderCode() {
+            document.getElementById('boot-loader-code').textContent = bootLoaderCode;
+            document.getElementById('memory-manager-code').textContent = memoryManagerCode;
+            document.getElementById('ghmp-init-code').textContent = ghmpInitCode;
+        }
+
+        // ==================== TERMINAL OUTPUT ====================
+        function terminalLog(message, type = 'info') {
+            const terminal = document.getElementById('terminal-output');
+            const colors = {
+                'info': 'text-gray-300',
+                'success': 'text-green-400',
+                'warning': 'text-amber-400',
+                'error': 'text-red-400',
+                'system': 'text-foxfire-400',
+                'data': 'text-blue-400'
+            };
+
+            const line = document.createElement('div');
+            line.className = colors[type] || colors.info;
+            line.textContent = message;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function clearTerminal() {
+            const terminal = document.getElementById('terminal-output');
+            terminal.innerHTML = `
+                <div class="text-gray-500">$ <span class="text-foxfire-400">foxfire</span> phase-0 --demo</div>
+                <div class="text-gray-500 mt-1">Waiting to execute...</div>
+            `;
+        }
+
+        // ==================== PHASE EXECUTION ====================
+        let isRunning = false;
+
+        async function runPhase() {
+            if (isRunning) return;
+            isRunning = true;
+
+            const runBtn = document.getElementById('run-btn');
+            runBtn.disabled = true;
+            runBtn.textContent = '⏳ Running...';
+            runBtn.className = 'px-4 py-2 bg-gray-600 rounded-lg text-sm font-semibold cursor-not-allowed';
+
+            clearTerminal();
+
+            // Step 1: CBS Boot
+            await executeStep1();
+
+            // Step 2: Memory Manager
+            await executeStep2();
+
+            // Step 3: GHMP Init
+            await executeStep3();
+
+            // Step 4: Complete
+            await executeStep4();
+
+            runBtn.textContent = '✓ Complete';
+            runBtn.className = 'px-4 py-2 bg-green-600 rounded-lg text-sm font-semibold';
+
+            // Show generated files
+            showGeneratedFiles();
+        }
+
+        async function executeStep1() {
+            terminalLog('', 'info');
+            terminalLog('═══════════════════════════════════════', 'system');
+            terminalLog('  PHASE 0: ALIGNMENT - CBS BOOT LOADER', 'system');
+            terminalLog('═══════════════════════════════════════', 'system');
+
+            await sleep(500);
+
+            const node = document.getElementById('node-boot');
+            node.classList.remove('opacity-50');
+            node.classList.add('foxfire-glow', 'node-pulse');
+
+            terminalLog('[CBS] Initializing at z=0.25', 'info');
+            await sleep(300);
+            terminalLog('[CBS] Environment validated', 'success');
+            await sleep(300);
+            terminalLog('[CBS] Identity anchors loaded', 'success');
+            await sleep(300);
+            terminalLog('[CBS] Boot sequence complete ✓', 'success');
+
+            document.getElementById('boot-status').textContent = 'Complete';
+            document.getElementById('boot-status').className = 'px-2 py-1 rounded text-xs bg-green-500/20 text-green-400';
+
+            updateProgress(25);
+
+            const arrow1 = document.getElementById('arrow-1');
+            arrow1.classList.remove('opacity-30');
+            arrow1.classList.add('bg-foxfire-500');
+        }
+
+        async function executeStep2() {
+            await sleep(500);
+
+            terminalLog('', 'info');
+            terminalLog('[MEMORY] Initializing CBS Memory Manager...', 'info');
+
+            const node = document.getElementById('node-memory');
+            node.classList.remove('opacity-50');
+            node.classList.add('foxfire-glow', 'node-pulse');
+
+            await sleep(300);
+            terminalLog('[MEMORY] Loading domain configuration...', 'info');
+            await sleep(200);
+
+            const domains = ['constraint', 'bridge', 'meta', 'recursion', 'triad', 'emergence', 'persistence'];
+            for (const domain of domains) {
+                terminalLog(`  → Registering ${domain} domain`, 'data');
+                await sleep(100);
+            }
+
+            terminalLog('[MEMORY] 7/7 domains registered ✓', 'success');
+
+            document.getElementById('memory-status').textContent = 'Complete';
+            document.getElementById('memory-status').className = 'px-2 py-1 rounded text-xs bg-green-500/20 text-green-400';
+
+            updateProgress(50);
+
+            const arrow2 = document.getElementById('arrow-2');
+            arrow2.classList.remove('opacity-30');
+            arrow2.classList.add('bg-foxfire-500');
+        }
+
+        async function executeStep3() {
+            await sleep(500);
+
+            terminalLog('', 'info');
+            terminalLog('[GHMP] Initializing plates...', 'info');
+
+            const node = document.getElementById('node-ghmp');
+            node.classList.remove('opacity-50');
+            node.classList.add('foxfire-glow', 'node-pulse');
+
+            const plates = [
+                { name: 'constraint', z: 0.41 },
+                { name: 'bridge', z: 0.52 },
+                { name: 'meta', z: 0.70 },
+                { name: 'recursion', z: 0.73 },
+                { name: 'triad', z: 0.80 },
+                { name: 'emergence', z: 0.85 },
+                { name: 'persistence', z: 0.87 },
+            ];
+
+            for (const plate of plates) {
+                await sleep(150);
+                terminalLog(`  ✓ ${plate.name}.ghmp (z=${plate.z})`, 'success');
+            }
+
+            await sleep(300);
+            terminalLog('[GHMP] 7/7 plates initialized ✓', 'success');
+
+            document.getElementById('ghmp-status').textContent = 'Complete';
+            document.getElementById('ghmp-status').className = 'px-2 py-1 rounded text-xs bg-green-500/20 text-green-400';
+
+            updateProgress(75);
+
+            const arrow3 = document.getElementById('arrow-3');
+            arrow3.classList.remove('opacity-30');
+            arrow3.classList.add('bg-foxfire-500');
+        }
+
+        async function executeStep4() {
+            await sleep(500);
+
+            const node = document.getElementById('node-output');
+            node.classList.remove('opacity-50');
+            node.classList.add('foxfire-glow', 'node-pulse');
+
+            terminalLog('', 'info');
+            terminalLog('═══════════════════════════════════════', 'system');
+            terminalLog('  PHASE 0 ALIGNMENT REPORT', 'system');
+            terminalLog('═══════════════════════════════════════', 'system');
+            terminalLog('{', 'data');
+            terminalLog('  "phase": 0,', 'data');
+            terminalLog('  "ritual": "alignment",', 'data');
+            terminalLog('  "plates_initialized": 7,', 'data');
+            terminalLog('  "status": "ALIGNED",', 'data');
+            terminalLog('  "z_range": { "min": 0.41, "max": 0.87 }', 'data');
+            terminalLog('}', 'data');
+            terminalLog('', 'info');
+            terminalLog('Phase 0: Alignment COMPLETE ✓', 'success');
+
+            updateProgress(100);
+        }
+
+        function updateProgress(percent) {
+            document.getElementById('progress-bar').style.width = percent + '%';
+            document.getElementById('progress-text').textContent = percent + '%';
+        }
+
+        function showGeneratedFiles() {
+            const container = document.getElementById('generated-files');
+            container.style.display = 'block';
+
+            const content = document.getElementById('generated-content');
+            content.innerHTML = `
+                <div class="terminal rounded-lg p-4">
+                    <div class="text-xs text-gray-500 mb-2">plates/constraint.ghmp</div>
+                    <pre class="text-xs text-gray-300 overflow-x-auto">{
+  "domain": "constraint",
+  "coordinates": { "z_origin": 0.41, "z_projection": 0.941 },
+  "pattern": "IDENTIFICATION",
+  "witness": "a7f3b2c1e8d94f6a..."
+}</pre>
+                </div>
+                <div class="terminal rounded-lg p-4">
+                    <div class="text-xs text-gray-500 mb-2">output/alignment_report.json</div>
+                    <pre class="text-xs text-gray-300 overflow-x-auto">{
+  "phase": 0,
+  "ritual": "alignment",
+  "plates_initialized": 7,
+  "status": "ALIGNED",
+  "z_range": { "min": 0.41, "max": 0.87 }
+}</pre>
+                </div>
+            `;
+        }
+
+        function resetDemo() {
+            isRunning = false;
+
+            // Reset button
+            const runBtn = document.getElementById('run-btn');
+            runBtn.disabled = false;
+            runBtn.textContent = '▶ Run Phase';
+            runBtn.className = 'px-4 py-2 bg-foxfire-600 hover:bg-foxfire-500 rounded-lg text-sm font-semibold transition';
+
+            // Reset nodes
+            ['node-boot', 'node-memory', 'node-ghmp', 'node-output'].forEach(id => {
+                const node = document.getElementById(id);
+                node.classList.add('opacity-50');
+                node.classList.remove('foxfire-glow', 'node-pulse');
+            });
+
+            // Reset arrows
+            ['arrow-1', 'arrow-2', 'arrow-3'].forEach(id => {
+                const arrow = document.getElementById(id);
+                arrow.classList.add('opacity-30');
+                arrow.classList.remove('bg-foxfire-500');
+            });
+
+            // Reset status badges
+            ['boot-status', 'memory-status', 'ghmp-status'].forEach(id => {
+                const badge = document.getElementById(id);
+                badge.textContent = 'Ready';
+                badge.className = 'px-2 py-1 rounded text-xs bg-gray-700 text-gray-400';
+            });
+
+            // Reset progress
+            updateProgress(0);
+
+            // Clear terminal
+            clearTerminal();
+
+            // Hide generated files
+            document.getElementById('generated-files').style.display = 'none';
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ==================== INITIALIZE ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFileTree();
+            renderCode();
+        });
+    </script>
+</body>
+</html>
